@@ -3,11 +3,10 @@
     "description": "Extensions for Zend Framework 2",
     "license": "CC-BY-SA-3.0",
     "keywords": [
-        "webriq",
         "zend",
         "framework",
         "zf2",
-        "zork"
+        "gridguyz"
     ],
     "homepage": "http://gridguyz.com/",
     "repositories": [
@@ -25,7 +24,6 @@
         "ext-fileinfo": "*",
         "ext-mbstring": "*",
         "ext-openssl": "*",
-        "ext-pdo_pgsql": "*",
         "zendframework/zendoauth": "2.*",
         "zendframework/zendopenid": "2.*",
         "zendframework/zendframework": "2.1.*"
