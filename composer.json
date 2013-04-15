@@ -1,0 +1,38 @@
+{
+    "name": "webriq/zork",
+    "description": "Extensions for Zend Framework 2",
+    "license": "CC-BY-SA-3.0",
+    "keywords": [
+        "webriq",
+        "zend",
+        "framework",
+        "zf2",
+        "zork"
+    ],
+    "homepage": "http://gridguyz.com/",
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "http://packages.zendframework.com/"
+        }
+    ],
+    "require": {
+        "php": ">=5.4",
+        "ext-gd": "*",
+        "ext-zip": "*",
+        "ext-curl": "*",
+        "ext-intl": "*",
+        "ext-fileinfo": "*",
+        "ext-mbstring": "*",
+        "ext-openssl": "*",
+        "ext-pdo_pgsql": "*",
+        "zendframework/zendoauth": "2.*",
+        "zendframework/zendopenid": "2.*",
+        "zendframework/zendframework": "2.1.*"
+    },
+    "autoload": {
+        "psr-0": {
+            "Zork": "src/"
+        }
+    }
+}
