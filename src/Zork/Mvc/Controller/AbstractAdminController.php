@@ -202,7 +202,7 @@ abstract class AbstractAdminController extends AbstractActionController
         $pages      = $this->getServiceLocator()
                            ->get( 'Configuration' )
                                 [ 'modules'       ]
-                                [ 'Core'          ]
+                                [ 'Grid\Core'     ]
                                 [ 'navigation'    ];
 
         if ( ! $this->isLayoutDisabled( $event ) )
@@ -227,7 +227,7 @@ abstract class AbstractAdminController extends AbstractActionController
                 ),
                 'adminLocaleForm'   => $this->getServiceLocator()
                                             ->get( 'Form' )
-                                            ->create( 'Core\AdminLocale', array(
+                                            ->create( 'Grid\Core\AdminLocale', array(
                                                 'adminLocale' => $this->getAdminLocale()
                                             ) )
             ) );
