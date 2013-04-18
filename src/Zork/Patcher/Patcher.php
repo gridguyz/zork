@@ -2,74 +2,41 @@
 
 namespace Zork\Patcher;
 
+use Exception;
 use FilesystemIterator;
+use CallbackFilterIterator;
+use InvalidArgumentException;
 use Zend\Db\Adapter\Adapter as DbAdapter;
 
 /**
  * Patch
  *
- * @author Sipos Zoltán <sipiszoty@gmail.com>
+ * @author David Pozsar <david.pozsar@megaweb.hu>
  */
 class Patcher
 {
 
     /**
-     * @var string
+     * @const string
      */
-    const PATCH_PATTERN = '/^(\\d{4}\\.\\d{2}\\.\\d{2})(\\.(\\d{2}))?-([^\\.]+)\\.sql$/i';
+    const PATCH_PATTERN = '/^(?P<type>data|schema)\.(?P<from>\d(\.\d){0,2})-(?P<to>\d(\.\d){0,2})\.sql$/';
 
     /**
-     * Patch directory
-     *
-     * @var string
-     */
-    protected $directory;
-
-    /**
-     * Db-config
-     *
      * @var array
      */
     protected $dbConfig;
 
     /**
-     * Execute on this schemas only (null if all)
+     * Versions' cache
      *
-     * @var array|null
+     * @var array
      */
-    protected $schemas;
+    private $versionCache = array();
 
     /**
-     * Db-adapterInstance
+     * Get the db-config
      *
-     * @var \Zend\Db\Adapter\Adapter
-     */
-    private $dbAdapter;
-
-    /**
-     * Get the configured patch directory
-     * @return string
-     */
-    public function getDirectory()
-    {
-        return $this->directory;
-    }
-
-    /**
-     * Set the patch directory
-     *
-     * @return Patcher Method returns own object
-     */
-    public function setDirectory( $dir )
-    {
-        $this->directory = $dir;
-        return $this;
-    }
-
-    /**
-     * Get the configured schemas
-     *
-     * @return string
+     * @return  array
      */
     public function getDbConfig()
     {
@@ -77,43 +44,22 @@ class Patcher
     }
 
     /**
-     * Set the schemas
+     * Set the db-config
      *
-     * @return Patcher Method returns own object
+     * @return  Patcher
      */
-    public function setDbConfig( $dbConfig )
+    public function setDbConfig( array $dbConfig = null )
     {
-        $this->dbConfig = (array) $dbConfig;
+        $this->dbConfig = $dbConfig;
         return $this;
     }
 
     /**
-     * Get the configured schemas
-     *
-     * @return string
-     */
-    public function getSchemas()
-    {
-        return $this->schemas;
-    }
-
-    /**
-     * Set the schemas
-     *
-     * @return Patcher Method returns own object
-     */
-    public function setSchemas( $schemas )
-    {
-        $this->schemas = $schemas ?: null;
-        return $this;
-    }
-
-    /**
-     * Return the current adapter by the cofiguration of Webriq 3 project
+     * Get the db-adapter object
      *
      * @return \Zend\Db\Adapter\Abstract
      */
-    protected function getDbAdapter()
+    public function getDbAdapter()
     {
         if ( null === $this->dbAdapter )
         {
@@ -124,272 +70,355 @@ class Patcher
     }
 
     /**
-     * Collect patches from the $directory directory
+     * Set the db-adapter object
      *
-     * @return array
+     * @param   \Zend\Db\Adapter\Adapter    $dbAdapter
+     * @return  Patcher
      */
-    protected function getPatchList()
+    public function setDbAdapter( DbAdapter $dbAdapter = null )
     {
-        $result     = array();
-        $iterator   = new FilesystemIterator( $this->getDirectory() );
-
-        foreach ( $iterator as $fileInfo )
-        {
-            if ( $fileInfo->isFile() &&
-                 ( $fileName = $fileInfo->getFilename() ) &&
-                 preg_match( self::PATCH_PATTERN, $fileName ) )
-            {
-                $result[] = $fileName;
-            }
-        }
-
-        natsort( $result );
-        return $result;
+        $this->dbAdapter = $dbAdapter;
+        return $this;
     }
 
     /**
-     * Method recieve the list of schemas
+     * Constructor
      *
-     * @return array  Array set of schemas
+     * @param   array|\Zend\Db\Adapter\Adapter  $db
+     * @throws  InvalidArgumentException
      */
-    protected function getSchemaList()
+    public function __construct( $db )
     {
-        $schemas = $this->getSchemas();
-
-        if ( empty( $schemas ) )
+        if ( $db instanceof DbAdapter )
         {
-            $schemas    = array( '_template' );
-            $result     = $this->getDbAdapter()
-                               ->query( 'SELECT "schema" FROM "_central"."site"' )
-                               ->execute();
-
-            foreach ( $result as $row )
-            {
-                $schemas[] = $row['schema'];
-            }
+            $this->setDbAdapter( $db );
         }
-
-        return $schemas;
+        else if ( is_array( $db ) )
+        {
+            $this->setDbConfig( $db );
+        }
+        else if ( ! empty( $db ) )
+        {
+            throw new InvalidArgumentException( sprintf(
+                '%s: $db must be a Zend\Db\Adapter\Adapter instance,' .
+                ' or a db-config array, "%s" given.',
+                __METHOD__,
+                is_object( $db ) ? get_class( $db ) : gettype( $db )
+            ) );
+        }
     }
 
     /**
-     * Create a more complex data structure from two singe string-array.
-     * Thet structure consists the full patch name, the simply patch name,
-     * the date and the number of issue of each patches.
-     * Also, the patch indexes contain the shemas array for updates.
+     * Patch with sql-files under a path
      *
-     * @param array $patchList   List of patches
-     * @param array $schemaList  List of available patches
-     * @return array             Complex data structure
+     * @param   string      $path
+     * @param   string|null $toVersion
+     * @return  void
      */
-    protected function evaluatePatches( $patchList, $schemaList )
+    public function patch( $path, $toVersion = null )
     {
-        $patchIndex = array();
-        $allSchemas = $schemaList;
-
-        foreach ( $patchList as $patch )
+        if ( ! is_dir( $path ) )
         {
-            $patchParts = array();
-            preg_match( self::PATCH_PATTERN, $patch, $patchParts );
-
-            $patchIndex[] = array(
-                'patch'     => $patchParts[0],
-                'date'      => $patchParts[1],
-                'number'    => (int) $patchParts[3] ?: 1,
-                'name'      => $patchParts[4],
-                'schemas'   => $patchParts[4] == '_allsite'
-                                ? $schemaList
-                                : array( $patchParts[4] )
-            );
-
-            if ( $patchParts[4] != '_allsite' &&
-                 ! in_array( $patchParts[4], $allSchemas ) )
-            {
-                $allSchemas[] = $patchParts[4];
-            }
+            return;
         }
 
-        return array( $patchIndex, $allSchemas );
+        $iterator = new CallbackFilterIterator(
+            new FilesystemIterator(
+                $path,
+                FilesystemIterator::CURRENT_AS_PATHNAME |
+                FilesystemIterator::KEY_AS_FILENAME |
+                FilesystemIterator::SKIP_DOTS |
+                FilesystemIterator::UNIX_PATHS
+            ),
+            function ( $current, $key, $iterator ) {
+                return $iterator->isDir() && '.' !== $key[0];
+            }
+        );
+
+        $connection = $this->getDbAdapter()
+                           ->getDriver()
+                           ->getConnection();
+
+        try
+        {
+            $connection->beginTransaction();
+
+            foreach ( $iterator as $section => $pathname )
+            {
+                $this->patchSection( $pathname, $section, $toVersion );
+            }
+
+            $connection->commit();
+        }
+        catch ( Exception $exception )
+        {
+            $connection->rollback();
+            throw $exception;
+        }
     }
 
     /**
-     * Collect the executed patches of all schema.
+     * Patch within a section
      *
-     * @param array $schemaList                     List of schemas
-     * @return   An associative array, keys consists the schema names,
-     *           elements consists a list of executed patches
+     * @param   string      $path
+     * @param   string      $section
+     * @param   string|null $toVersion
+     * @return  void
      */
-    protected function getContentOfSchemaPatchTables( $schemaList )
+    protected function patchSection( $path, $section, $toVersion = null )
     {
-        $result = array();
-        $db     = $this->getDbAdapter();
-        $plf    = $db->getPlatform();
-
-        foreach ( $schemaList as $schema )
+        if ( is_dir( $path . '/common' ) )
         {
-            $result[$schema] = array();
-            $schemaQuoted    = $plf->quoteIdentifier( $schema );
+            $this->patchSchema( $path . '/common', $section, '_common', $toVersion );
+        }
 
-            $db->query( '
-                    CREATE TABLE IF NOT EXISTS ' . $schemaQuoted . '."patch"
-                    (
-                        "id"        SERIAL                      PRIMARY KEY,
-                        "patch"     CHARACTER VARYING           NOT NULL    UNIQUE,
-                        "date"      DATE                        NOT NULL,
-                        "number"    INTEGER                     NOT NULL,
-                        "name"      CHARACTER VARYING           NOT NULL,
-                        "timestamp" TIMESTAMP WITH TIME ZONE    NOT NULL    DEFAULT CURRENT_TIMESTAMP
-                    )
-                ' )
+        if ( is_dir( $path . '/central' ) )
+        {
+            $this->patchSchema( $path . '/central', $section, '_central', $toVersion );
+        }
+
+        if ( is_dir( $path . '/site' ) )
+        {
+            if ( false )
+            {
+                // do loop with every site's schema
+            }
+            else
+            {
+                $this->patchSchema( $path . '/site', $section, null, $toVersion );
+            }
+        }
+    }
+
+    /**
+     * Patch a single schema
+     *
+     * @param   string      $path
+     * @param   string      $section
+     * @param   string|null $schema
+     * @param   string|null $toVersion
+     * @return  void
+     */
+    protected function patchSchema( $path, $section, $schema = null, $toVersion = null )
+    {
+        $db         = $this->getDbAdapter();
+        $connection = $db->getDriver()
+                         ->getConnection();
+
+        if ( null !== $schema )
+        {
+            $oldSchema = $connection->setCurrentSchema( $schema );
+        }
+
+        $fromVersion = $this->getVersion( $section, $schema );
+
+        if ( null === $toVersion || ! $fromVersion )
+        {
+            $direction = 1;
+        }
+        else if ( ! $toVersion )
+        {
+            $direction = -1;
+        }
+        else
+        {
+            $direction = version_compare( $toVersion, $fromVersion );
+        }
+
+        if ( $direction !== 0 )
+        {
+            $info = $this->getPatchInfo( $path );
+            $prev = $next = $fromVersion;
+
+            while ( true )
+            {
+                $prev = $next;
+                $next = $this->getNextVersion( $info, $direction, $prev, $toVersion );
+
+                if ( ! $next )
+                {
+                    break;
+                }
+
+                foreach ( $info as $patch )
+                {
+                    if ( $patch['from'] == $prev && $patch['to'] == $next )
+                    {
+                        $connection->getResource()
+                                   ->exec( file_get_contents( $patch['path'] ) );
+                    }
+                }
+            }
+
+            $this->setVersion( $section, $prev, $schema );
+        }
+
+        if ( null !== $schema )
+        {
+            $connection->setCurrentSchema( $oldSchema );
+        }
+    }
+
+    /**
+     * Get version of section (in a schema)
+     *
+     * @param   string      $section
+     * @param   string|null $schema
+     * @return  string
+     */
+    protected function getVersion( $section, $schema = null )
+    {
+        if ( ! isset( $this->versionCache[$schema] ) )
+        {
+            $db         = $this->getDbAdapter();
+            $platform   = $db->getPlatform();
+            $prefix     = $schema ? $platform->quoteIdentifier( $schema ) : '';
+
+            if ( $prefix )
+            {
+                $prefix .= '.';
+            }
+
+            $db->query( 'CREATE TABLE IF NOT EXISTS ' . $prefix . '"patch" (
+                             "id"        SERIAL              PRIMARY KEY,
+                             "section"   CHARACTER VARYING   NOT NULL        UNIQUE,
+                             "version"   CHARACTER VARYING   NOT NULL
+                         )' )
                ->execute();
 
-            $query = $db->query( 'SELECT "patch" FROM ' . $schemaQuoted . '."patch"' )
+            $query = $db->query( 'SELECT * FROM ' . $prefix . '."patch"' )
                         ->execute();
 
             foreach ( $query as $row )
             {
-                $result[$schema][] = $row['patch'];
+                $this->versionCache[$schema][$row['section']] = $row['version'];
             }
         }
 
-        return $result;
+        if ( empty( $this->versionCache[$schema][$section] ) )
+        {
+            return 0;
+        }
+
+        return $this->versionCache[$schema][$section];
     }
 
     /**
-     * Method filter element whiches are contained by schema array
+     * Set version of section (in a schema)
      *
-     * @param array $patchList    Patch list with patch records
-     * @param array $schemaList   Schema list,
-     * @return array              The filterd patch list elements
+     * @param   string      $section
+     * @param   string      $newVersion
+     * @param   string|null $schema
+     * @return  \Zork\Patcher\Patcher
      */
-    protected function filterPatches( $patchList, $schemaList )
+    protected function setVersion( $section, $newVersion, $schema = null )
     {
-        foreach ( $patchList as $patchKey => &$patch )
+        $oldVersion = $this->getVersion( $section, $schema );
+
+        if ( $oldVersion !== $newVersion )
         {
-            foreach ( $patch['schemas'] as $schemaKey => $schema )
+            $db         = $this->getDbAdapter();
+            $platform   = $db->getPlatform();
+            $prefix     = $schema ? $platform->quoteIdentifier( $schema ) : '';
+
+            if ( $oldVersion )
             {
-                if ( isset( $schemaList[$schema] ) &&
-                     is_array( $schemaList[$schema] ) &&
-                     in_array( $patch['patch'], $schemaList[$schema] ) )
-                {
-                    unset( $patchList[$patchKey]['schemas'][$schemaKey] );
-                }
+                $query = $db->query( '
+                    UPDATE ' . $prefix . '."patch"
+                       SET "version" = :version
+                     WHERE "section" = :section
+                ' );
+
+            }
+            else
+            {
+                $query = $db->query( '
+                    INSERT INTO ' . $prefix . '."patch" ( "section", "version" )
+                         VALUES ( :section, :version )
+                ' );
             }
 
-            if ( empty( $patch['schemas'] ) )
-            {
-                unset( $patchList[$patchKey] );
-            }
+            $query->execute( array(
+                'version' => $newVersion,
+                'section' => $section,
+            ) );
+
+            $this->versionCache[$schema][$section] = $newVersion;
         }
 
-        return $patchList;
+        return $this;
     }
 
     /**
-     * Execute query-s in a transaction from patches applied to the specified schemas
+     * Get patch info
      *
-     * @param array $patchList Valuable patches to execute in transaction
-     * @return                 An argument list, which consists informations about the process.
+     * @param   string $path
+     * @return  array
      */
-    protected function executePatchTransaction( $patchList )
+    protected function getPatchInfo( $path )
     {
-        $result = new Result();
-        $result->log( 'Starting patcher', Result::LOG_INFO );
-
-        if ( empty( $patchList ) )
-        {
-            $result->log( 'Empty patch-list', Result::LOG_INFO );
-            $result->status = Result::STATUS_NONE;
-            return $result;
-        }
-
-        $result->log( 'Begin transaction', Result::LOG_INFO );
-        $result->log( 'BEGIN', Result::LOG_SQL );
-
-        $db   = $this->getDbAdapter();
-        $plf  = $db->getPlatform();
-        $drv  = $db->getDriver();
-        $conn = $drv->getConnection();
-        $pdo  = $conn->getResource();
-
-        $conn->beginTransaction();
-
-        try
-        {
-            $sql = function ( $sql ) use ( $pdo, $result )
-            {
-                $result->log( $sql, Result::LOG_SQL );
-                return $pdo->exec( $sql );
-            };
-
-            foreach ( $patchList as $patchRecord )
-            {
-                $patch = $patchRecord['patch'];
-
-                $result->patchList[] = $patch;
-                $result->patch       = $patch;
-
-                $result->log( 'Run patch: ' . $patch, Result::LOG_INFO );
-
-                $patchContent = file_get_contents(
-                    $this->getDirectory() . DIRECTORY_SEPARATOR . $patch
-                );
-
-                foreach ( $patchRecord['schemas'] as $schema )
-                {
-                    $result->schemaList[] = $schema;
-                    $result->schema       = $schema;
-                    $schemaQuoted         = $plf->quoteIdentifier( $schema );
-
-                    $sql( 'SET search_path TO ' . $schemaQuoted . ', "_common"' );
-                    $sql( $patchContent );
-
-                    // Update schemas patch table
-                    $db->query( 'INSERT INTO "patch" ( "patch", "date", "number", "name" ) VALUES ( ?, ?, ?, ? )' )
-                       ->execute( array( $patch, $patchRecord['date'], $patchRecord['number'], $patchRecord['name'] ) );
-                }
-            }
-
-            $result->log( 'Commit transaction', Result::LOG_INFO );
-            $result->log( 'COMMIT', Result::LOG_SQL );
-
-            $conn->commit();
-
-            $result->status     = Result::STATUS_SUCCESS;
-            $result->schemaList = array_unique( $result->schemaList );
-        }
-        catch ( \Exception $ex )
-        {
-            $result->log( (string) $ex, Result::LOG_ERROR );
-
-            $result->log( 'Rollback transaction', Result::LOG_INFO );
-            $result->log( 'ROLLBACK', Result::LOG_SQL );
-
-            $conn->rollBack();
-
-            $result->status = Result::STATUS_ERROR;
-            $result->error  = $ex->getMessage();
-        }
-
-        return $result;
-    }
-
-    /**
-     * Execute the patching process by given options
-     *
-     * @return   Method returns a record array about process.
-     */
-    public function execute()
-    {
-        $patchList  = $this->getPatchList();
-        $schemaList = $this->getSchemaList();
-
-        list( $patchIndex, $allSchemas ) = $this->evaluatePatches(
-            $patchList, $schemaList
+        $iterator = new FilesystemIterator(
+            $path,
+            FilesystemIterator::CURRENT_AS_PATHNAME |
+            FilesystemIterator::KEY_AS_FILENAME |
+            FilesystemIterator::SKIP_DOTS |
+            FilesystemIterator::UNIX_PATHS
         );
 
-        return $this->executePatchTransaction( $this->filterPatches(
-            $patchIndex, $this->getContentOfSchemaPatchTables( $allSchemas )
-        ) );
+        $data   = array();
+        $schema = array();
+
+        foreach ( $iterator as $name => $pathname )
+        {
+            $matches = array();
+
+            if ( preg_match( static::PATCH_PATTERN, $name, $matches ) )
+            {
+                $store = array(
+                    'name'  => $name,
+                    'path'  => $pathname,
+                    'type'  => $matches['type'],
+                    'from'  => $matches['from'],
+                    'to'    => $matches['to'],
+                );
+
+                switch ( $matches['type'] )
+                {
+                    case 'data':    $data[]   = $store; break;
+                    case 'schema':  $schema[] = $store; break;
+                }
+            }
+        }
+
+        return array_merge( $schema, $data );
     }
+
+    /**
+     * Get next version
+     *
+     * @param   array   $info
+     * @param   int     $direction
+     * @param   string  $fromVersion
+     * @param   string  $toVersion
+     * @return  string
+     */
+    protected function getNextVersion( $info, $direction, $fromVersion, $toVersion )
+    {
+        $extrema = null;
+
+        foreach ( $info as $patch )
+        {
+            $dir = version_compare( $patch['from'], $patch['to'] );
+
+            if ( $patch['from'] == $fromVersion && $dir === $direction &&
+                 ( ( $direction > 0 && ( ! $extrema || ( version_compare( $patch['to'], $extrema, '>' ) && ( ! $toVersion || version_compare( $patch['to'], $toVersion, '<=' ) ) ) ) ) ||
+                   ( $direction < 0 && ( ! $extrema || ( version_compare( $patch['to'], $extrema, '<' ) && ( ! $toVersion || version_compare( $patch['to'], $toVersion, '>=' ) ) ) ) ) ) )
+            {
+                $extrema = $patch['to'];
+            }
+        }
+
+        return $extrema;
+    }
+
 }

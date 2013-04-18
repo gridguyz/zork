@@ -35,7 +35,7 @@ class CallbackMapIterator extends MapIterator
     public function map( $value, $key )
     {
         $callback = $this->callback;
-        return $callback( $value, $key );
+        return $callback( $value, $key, $this );
     }
 
 }

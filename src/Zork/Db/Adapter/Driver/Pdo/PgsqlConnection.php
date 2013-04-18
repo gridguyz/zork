@@ -34,8 +34,8 @@ class PgsqlConnection extends Connection
     protected $transactionSavepointUniqueId;
 
     /**
-     * @param array|\PDO|null $connectionParameters
-     * @throws \Zend\Db\Adapter\Exception\InvalidArgumentException
+     * @param   array|\PDO|null $connectionParameters
+     * @throws  \Zend\Db\Adapter\Exception\InvalidArgumentException
      */
     public function __construct( $connectionParameters = null )
     {
@@ -78,8 +78,8 @@ class PgsqlConnection extends Connection
     /**
      * Get current (active) schemas
      *
-     * @param bool $catalog if true, pg_catalog is listed here
-     * @return array|null
+     * @param   bool        $catalog if true, pg_catalog is listed here
+     * @return  array|null
      */
     public function getCurrentSchemas( $catalog = false )
     {
@@ -105,9 +105,9 @@ class PgsqlConnection extends Connection
     /**
      * Escape a schema name
      *
-     * @staticvar array $escape
-     * @param string $schema
-     * @return string
+     * @staticvar   array   $escape
+     * @param       string  $schema
+     * @return      string
      */
     protected function escapeSchema( $schema )
     {
@@ -118,8 +118,8 @@ class PgsqlConnection extends Connection
     /**
      * Set current schemas
      *
-     * @param array $schemas
-     * @return \Zork\Db\Adapter\Driver\Pdo\PgsqlConnection
+     * @param   array $schemas
+     * @return  \Zork\Db\Adapter\Driver\Pdo\PgsqlConnection
      */
     public function setCurrentSchemas( $schemas )
     {
@@ -143,8 +143,8 @@ class PgsqlConnection extends Connection
     /**
      * Set current schema
      *
-     * @param string $schema
-     * @return \Zork\Db\Adapter\Driver\Pdo\PgsqlConnection
+     * @param   string  $schema
+     * @return  string  the old schema
      */
     public function setCurrentSchema( $schema )
     {
@@ -153,11 +153,13 @@ class PgsqlConnection extends Connection
 
         if ( isset( $current[0] ) && $current[0] == $schema )
         {
-            return $this;
+            return $current[0];
         }
 
+        $old        = $current[0];
         $current[0] = $schema;
-        return $this->setCurrentSchemas( $current );
+        $this->setCurrentSchemas( $current );
+        return $old;
     }
 
     /**
@@ -193,8 +195,8 @@ class PgsqlConnection extends Connection
     /**
      * Set nestable transactions enabled flag
      *
-     * @param bool $flag
-     * @return \Zork\Db\Adapter\Driver\Pdo\PgsqlConnection
+     * @param   bool $flag
+     * @return  \Zork\Db\Adapter\Driver\Pdo\PgsqlConnection
      */
     public function setNestableTransactionsEnabled( $flag )
     {
@@ -205,7 +207,7 @@ class PgsqlConnection extends Connection
     /**
      * Checks for unbalanced nested transactions
      *
-     * @throws UnbalancedNestedTransactionsException
+     * @throws  UnbalancedNestedTransactionsException
      */
     protected function checkUnbalancedNestedTransactions()
     {
@@ -220,8 +222,8 @@ class PgsqlConnection extends Connection
     /**
      * Rollback all level of transactions
      *
-     * @return \Zork\Db\Adapter\Driver\Pdo\PgsqlConnection
-     * @throws UnbalancedNestedTransactionsException
+     * @return  \Zork\Db\Adapter\Driver\Pdo\PgsqlConnection
+     * @throws  UnbalancedNestedTransactionsException
      */
     public function resetTransactions()
     {
@@ -244,8 +246,8 @@ class PgsqlConnection extends Connection
     }
 
     /**
-     * @return \Zork\Db\Adapter\Driver\Pdo\PgsqlConnection
-     * @throws UnbalancedNestedTransactionsException
+     * @return  \Zork\Db\Adapter\Driver\Pdo\PgsqlConnection
+     * @throws  UnbalancedNestedTransactionsException
      */
     public function beginTransaction()
     {
@@ -278,8 +280,8 @@ class PgsqlConnection extends Connection
     }
 
     /**
-     * @return \Zork\Db\Adapter\Driver\Pdo\PgsqlConnection
-     * @throws UnbalancedNestedTransactionsException
+     * @return  \Zork\Db\Adapter\Driver\Pdo\PgsqlConnection
+     * @throws  UnbalancedNestedTransactionsException
      */
     public function commit()
     {
@@ -312,8 +314,8 @@ class PgsqlConnection extends Connection
     }
 
     /**
-     * @return \Zork\Db\Adapter\Driver\Pdo\PgsqlConnection
-     * @throws UnbalancedNestedTransactionsException
+     * @return  \Zork\Db\Adapter\Driver\Pdo\PgsqlConnection
+     * @throws  UnbalancedNestedTransactionsException
      */
     public function rollBack()
     {
