@@ -408,10 +408,12 @@ class Patcher
 
         foreach ( $info as $patch )
         {
-            $dir = version_compare( $patch['from'], $patch['to'] );
+            $dir = version_compare( $patch['to'], $patch['from'] );
 
             if ( $patch['from'] == $fromVersion && $dir === $direction &&
+                // ( is upgrade     && ( no max yet || ( current is greater than max                    && ( no upper bound || current is under the upper bound                ) ) ) )
                  ( ( $direction > 0 && ( ! $extrema || ( version_compare( $patch['to'], $extrema, '>' ) && ( ! $toVersion || version_compare( $patch['to'], $toVersion, '<=' ) ) ) ) ) ||
+                // ( is downgrade   && ( no min yet || ( current is lesser than min                     && ( no lower bound || current is above the lower bound                ) ) ) )
                    ( $direction < 0 && ( ! $extrema || ( version_compare( $patch['to'], $extrema, '<' ) && ( ! $toVersion || version_compare( $patch['to'], $toVersion, '>=' ) ) ) ) ) ) )
             {
                 $extrema = $patch['to'];
