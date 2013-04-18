@@ -19,12 +19,12 @@ abstract class AbstractAdminController extends AbstractActionController
     /**
      * @var string
      */
-    const NOT_LOGGED_REDIRECT_URL       = 'User\Authentication\Login';
+    const NOT_LOGGED_REDIRECT_URL       = 'Grid\User\Authentication\Login';
 
     /**
      * @var string
      */
-    const NOT_ALLOWED_REDIRECT_URL      = 'Core\Admin\NotAllowed';
+    const NOT_ALLOWED_REDIRECT_URL      = 'Grid\Core\Admin\NotAllowed';
 
     /**
      * @var array
@@ -221,8 +221,7 @@ abstract class AbstractAdminController extends AbstractActionController
                         (string) $this->locale(),
                         $this->getServiceLocator()
                              ->get( 'translator' ),
-                        $this->getServiceLocator()
-                             ->get( 'User\Model\Permissions\Model' )
+                        $this->getPermissionsModel()
                     )
                 ),
                 'adminLocaleForm'   => $this->getServiceLocator()
@@ -290,7 +289,7 @@ abstract class AbstractAdminController extends AbstractActionController
         if ( null === $this->permissionsModel )
         {
             $this->permissionsModel = $this->getServiceLocator()
-                                           ->get( 'User\Model\Permissions\Model' );
+                                           ->get( 'Grid\User\Model\Permissions\Model' );
         }
 
         return $this->permissionsModel;
