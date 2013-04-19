@@ -3,6 +3,9 @@
 namespace Zork\Patcher;
 
 use Exception;
+use Traversable;
+use LogicException;
+use IteratorAggregate;
 use FilesystemIterator;
 use CallbackFilterIterator;
 use InvalidArgumentException;
@@ -19,12 +22,26 @@ class Patcher
     /**
      * @const string
      */
-    const PATCH_PATTERN = '/^(?P<type>data|schema)\.(?P<from>\d(\.\d){0,2})-(?P<to>\d(\.\d){0,2})\.sql$/';
+    const PATCH_PATTERN = '/^(?P<type>data|schema)\.(?P<from>\d+(\.((dev|a|b|rc)\d*|\d+))*-(?P<to>\d+(\.((dev|a|b|rc)\d*|\d+))*?)\.sql$/';
 
     /**
      * @var array
      */
     protected $dbConfig;
+
+    /**
+     * Is current db a multisite?
+     *
+     * @var bool
+     */
+    private $isMultisite;
+
+    /**
+     * Schemas' cache
+     *
+     * @var array
+     */
+    private $schemaCache = array();
 
     /**
      * Versions' cache
@@ -84,10 +101,10 @@ class Patcher
     /**
      * Constructor
      *
-     * @param   array|\Zend\Db\Adapter\Adapter  $db
+     * @param   null|array|\Zend\Db\Adapter\Adapter $db
      * @throws  InvalidArgumentException
      */
-    public function __construct( $db )
+    public function __construct( $db = null )
     {
         if ( $db instanceof DbAdapter )
         {
@@ -109,31 +126,41 @@ class Patcher
     }
 
     /**
-     * Patch with sql-files under a path
+     * Patch with sql-files under multiple paths
      *
-     * @param   string      $path
-     * @param   string|null $toVersion
+     * @param   string|array|\Traversable   $paths
+     * @param   string|null                 $toVersion
      * @return  void
      */
-    public function patch( $path, $toVersion = null )
+    public function patch( $paths, $toVersion = null )
     {
-        if ( ! is_dir( $path ) )
+        if ( ! $paths instanceof Traversable && ! is_array( $paths ) )
         {
-            return;
+            $paths = array( (string) $paths );
         }
 
-        $iterator = new CallbackFilterIterator(
-            new FilesystemIterator(
-                $path,
-                FilesystemIterator::CURRENT_AS_PATHNAME |
-                FilesystemIterator::KEY_AS_FILENAME |
-                FilesystemIterator::SKIP_DOTS |
-                FilesystemIterator::UNIX_PATHS
-            ),
-            function ( $current, $key, $iterator ) {
-                return $iterator->isDir() && '.' !== $key[0];
+        $filter = function ( $path ) {
+            return $path && is_dir( $path ) && is_readable( $path );
+        };
+
+        if ( is_array( $paths ) )
+        {
+            $paths = array_filter( $paths, $filter );
+
+            if ( empty( $paths ) )
+            {
+                return;
             }
-        );
+        }
+        elseif ( $paths instanceof Traversable )
+        {
+            if ( $paths instanceof IteratorAggregate )
+            {
+                $paths = $paths->getIterator();
+            }
+
+            $paths = new CallbackFilterIterator( $paths, $filter );
+        }
 
         $connection = $this->getDbAdapter()
                            ->getDriver()
@@ -143,9 +170,25 @@ class Patcher
         {
             $connection->beginTransaction();
 
-            foreach ( $iterator as $section => $pathname )
+            foreach ( $paths as $path )
             {
-                $this->patchSection( $pathname, $section, $toVersion );
+                $iterator = new CallbackFilterIterator(
+                    new FilesystemIterator(
+                        $path,
+                        FilesystemIterator::CURRENT_AS_PATHNAME |
+                        FilesystemIterator::KEY_AS_FILENAME |
+                        FilesystemIterator::SKIP_DOTS |
+                        FilesystemIterator::UNIX_PATHS
+                    ),
+                    function ( $current, $key, $iterator ) {
+                        return $iterator->isDir() && '.' !== $key[0];
+                    }
+                );
+
+                foreach ( $iterator as $section => $pathname )
+                {
+                    $this->patchSection( $pathname, $section, $toVersion );
+                }
             }
 
             $connection->commit();
@@ -179,15 +222,78 @@ class Patcher
 
         if ( is_dir( $path . '/site' ) )
         {
-            if ( false )
+            if ( $this->isMultisite() )
             {
-                // do loop with every site's schema
+                foreach ( $this->getSiteSchemas() as $schema )
+                {
+                    $this->patchSchema( $path . '/site', $section, $schema, $toVersion );
+                }
             }
             else
             {
                 $this->patchSchema( $path . '/site', $section, null, $toVersion );
             }
         }
+    }
+
+    /**
+     * Is current db a multisite?
+     *
+     * @return  bool
+     */
+    protected function isMultisite()
+    {
+        if ( null === $this->isMultisite )
+        {
+            $this->isMultisite = false;
+
+            $db     = $this->getDbAdapter();
+            $query  = $db->query( 'SELECT TRUE AS "exists"
+                                     FROM information_schema.tables
+                                    WHERE table_schema  = :schema
+                                      AND table_name    = :table' )
+                         ->execute( array(
+                             'schema'   => '_central',
+                             'table'    => 'site',
+                         ) );
+
+            foreach ( $query as $row )
+            {
+                $this->isMultisite = $this->isMultisite || $row['exists'];
+            }
+        }
+
+        return $this->isMultisite;
+    }
+
+    /**
+     * Get site schemas
+     *
+     * @return  array|null
+     */
+    protected function getSiteSchemas()
+    {
+        if ( $this->isMultisite() )
+        {
+            if ( null === $this->schemaCache )
+            {
+                $db     = $this->getDbAdapter();
+                $query  = $db->query( 'SELECT "schema" FROM "_central"."site"' )
+                             ->execute();
+
+                $this->schemaCache = array();
+
+                foreach ( $query as $row )
+                {
+                    $schema = $row['schema'];
+                    $this->schemaCache[$schema] = $schema;
+                }
+            }
+
+            return $this->schemaCache;
+        }
+
+        return null;
     }
 
     /**
@@ -250,6 +356,17 @@ class Patcher
                 }
             }
 
+            if ( null !== $toVersion && $prev !== $toVersion )
+            {
+                throw new LogicException( sprintf(
+                    '%s: section "%s" cannot be patched to version "%s", step from "%s" is missing',
+                    __METHOD__,
+                    $section,
+                    $toVersion,
+                    $prev
+                ) );
+            }
+
             $this->setVersion( $section, $prev, $schema );
         }
 
@@ -270,23 +387,42 @@ class Patcher
     {
         if ( ! isset( $this->versionCache[$schema] ) )
         {
+            $exists     = false;
             $db         = $this->getDbAdapter();
             $platform   = $db->getPlatform();
-            $prefix     = $schema ? $platform->quoteIdentifier( $schema ) : '';
+            $quoted     = '';
 
-            if ( $prefix )
+            if ( $schema )
             {
-                $prefix .= '.';
+                $quoted = $platform->quoteIdentifier( $schema );
+                $query  = $db->query( 'SELECT TRUE AS "exists"
+                                         FROM information_schema.schemata
+                                        WHERE schema_name = :schema' )
+                             ->execute( array(
+                                 'schema' => $schema,
+                             ) );
+
+                foreach ( $query as $row )
+                {
+                    $exists = $exists || $row['exists'];
+                }
+
+                if ( ! $exists )
+                {
+                    $db->query( 'CREATE SCHEMA ' . $quoted );
+                }
+
+                $quoted .= '.';
             }
 
-            $db->query( 'CREATE TABLE IF NOT EXISTS ' . $prefix . '"patch" (
+            $db->query( 'CREATE TABLE IF NOT EXISTS ' . $quoted . '"patch" (
                              "id"        SERIAL              PRIMARY KEY,
                              "section"   CHARACTER VARYING   NOT NULL        UNIQUE,
                              "version"   CHARACTER VARYING   NOT NULL
                          )' )
                ->execute();
 
-            $query = $db->query( 'SELECT * FROM ' . $prefix . '."patch"' )
+            $query = $db->query( 'SELECT * FROM ' . $quoted . '."patch"' )
                         ->execute();
 
             foreach ( $query as $row )
