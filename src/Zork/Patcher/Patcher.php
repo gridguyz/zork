@@ -462,12 +462,12 @@ class Patcher
         {
             $db         = $this->getDbAdapter();
             $platform   = $db->getPlatform();
-            $prefix     = $schema ? $platform->quoteIdentifier( $schema ) : '';
+            $prefix     = $schema ? $platform->quoteIdentifier( $schema ) . '.' : '';
 
             if ( $oldVersion )
             {
                 $query = $db->query( '
-                    UPDATE ' . $prefix . '."patch"
+                    UPDATE ' . $prefix . '"patch"
                        SET "version" = :version
                      WHERE "section" = :section
                 ' );
@@ -476,7 +476,7 @@ class Patcher
             else
             {
                 $query = $db->query( '
-                    INSERT INTO ' . $prefix . '."patch" ( "section", "version" )
+                    INSERT INTO ' . $prefix . '"patch" ( "section", "version" )
                          VALUES ( :section, :version )
                 ' );
             }
