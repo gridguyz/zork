@@ -10,6 +10,7 @@ use FilesystemIterator;
 use CallbackFilterIterator;
 use InvalidArgumentException;
 use Zend\Db\Adapter\Adapter as DbAdapter;
+use Zork\Db\Adapter\Adapter as ZorkDbAdapter;
 
 /**
  * Patch
@@ -85,7 +86,7 @@ class Patcher
     {
         if ( null === $this->dbAdapter )
         {
-            $this->dbAdapter = new DbAdapter( $this->getDbConfig() );
+            $this->dbAdapter = new ZorkDbAdapter( $this->getDbConfig() );
         }
 
         return $this->dbAdapter;
