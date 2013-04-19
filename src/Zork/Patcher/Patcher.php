@@ -415,7 +415,8 @@ class Patcher
 
                 if ( ! $exists )
                 {
-                    $db->query( 'CREATE SCHEMA ' . $quoted );
+                    $db->query( 'CREATE SCHEMA ' . $quoted )
+                       ->execute();
                 }
 
                 $quoted .= '.';
