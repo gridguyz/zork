@@ -25,6 +25,11 @@ class Patcher
     const PATCH_PATTERN = '/^(?P<type>data|schema)\.(?P<from>\d+(\.((dev|a|b|rc)\d*|\d+))*-(?P<to>\d+(\.((dev|a|b|rc)\d*|\d+))*?)\.sql$/';
 
     /**
+     * @var \Zend\Db\Adapter\Abstract
+     */
+    protected $dbAdapter;
+
+    /**
      * @var array
      */
     protected $dbConfig;
