@@ -429,7 +429,7 @@ class Patcher
                          )' )
                ->execute();
 
-            $query = $db->query( 'SELECT * FROM ' . $quoted . '."patch"' )
+            $query = $db->query( 'SELECT * FROM ' . $quoted . '"patch"' )
                         ->execute();
 
             foreach ( $query as $row )
