@@ -114,7 +114,7 @@ class Password
                 }
 
                 $cost = isset( $options['cost'] ) ? min( 31, max( 4, (int) $options['cost'] ) ) : 7;
-                $salt = ( version_compare( PHP_VERSION, '5.3.7' ) >= 0 ? '$2y$' : '$2a$' )
+                $salt = ( version_compare( PHP_VERSION, '5.3.7' ) >= 0 ? '$2y' : '$2a' ) . '$'
                       . str_pad( $cost, 2, '0', STR_PAD_LEFT ) . '$' . $options['salt'] . '$';
 
                 break;
