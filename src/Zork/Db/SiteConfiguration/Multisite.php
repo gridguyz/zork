@@ -35,7 +35,8 @@ class Multisite implements SiteConfigurationInterface
 
         $query = $db->query( '
             SELECT *
-              FROM ' . $platform->quoteIdentifier( 'fulldomain' ) . '
+              FROM ' . $platform->quoteIdentifier( 'central' ) . '.'
+                     . $platform->quoteIdentifier( 'fulldomain' ) . '
              WHERE ' . $platform->quoteIdentifier( 'fulldomain' ) . '
                  = ' . $driver->formatParameterName( 'fulldomain' ) . '
         ' );
