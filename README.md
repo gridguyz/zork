@@ -1,6 +1,8 @@
 Zork: Extensions for Zend Framework 2
 =====================================
 
+[![Build Status](https://travis-ci.org/webriq/zork.png?branch=master)](https://travis-ci.org/webriq/zork)
+
 Zork extends Zend Framework 2 by:
 
 * Lots of service factories
