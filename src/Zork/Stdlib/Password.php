@@ -167,7 +167,7 @@ class Password
 
         if ( function_exists( 'password_needs_rehash' ) )
         {
-            return password_needs_rehash( $algo, $options );
+            return password_needs_rehash( $hash, $algo, $options );
         }
 
         switch ( $algo )
