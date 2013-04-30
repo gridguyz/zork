@@ -62,11 +62,15 @@ class PasswordTest extends TestCase
 
     /**
      * Test unknown hash generation
-     *
-     * @expectedException   InvalidArgumentException
      */
     public function testUnknownHash()
     {
+        $this->setExpectedException(
+            function_exists( 'password_hash' )
+                ? 'PHPUnit_Framework_Error'
+                : 'InvalidArgumentException'
+        );
+
         Password::hash( $this->examplePassword, -1 );
     }
 

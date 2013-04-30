@@ -3,7 +3,6 @@
 namespace Zork\Stdlib;
 
 use Zend\Math\Rand;
-use Zend\Stdlib\ErrorHandler;
 
 if ( ! defined( 'PASSWORD_BCRYPT' ) )
 {
@@ -168,20 +167,7 @@ class Password
 
         if ( function_exists( 'password_needs_rehash' ) )
         {
-            ErrorHandler::start( E_ALL );
-            $hash   = password_needs_rehash( $hash, $algo, $options );
-            $error  = ErrorHandler::stop();
-
-            if ( $error )
-            {
-                throw new \InvalidArgumentException( sprintf(
-                    '%s: algorithm #%d not supported',
-                    __METHOD__,
-                    $algo
-                ), 0, $error );
-            }
-
-            return $hash;
+            return password_needs_rehash( $hash, $algo, $options );
         }
 
         switch ( $algo )
