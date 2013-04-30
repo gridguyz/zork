@@ -39,11 +39,12 @@ class PasswordTest extends TestCase
             'salt' => Password::salt(),
         );
 
-        $hash = Password::hash( $this->examplePassword, Password::ALGO_DEFAULT, $opts );
+        $hash = Password::hash( $this->examplePassword, null, $opts );
 
+        $this->assertNotEmpty( $hash );
         $this->assertNotEquals( $this->examplePassword, $hash );
         $this->assertTrue( Password::verify( $this->examplePassword, $hash ) );
-        $this->assertFalse( Password::needsRehash( $hash, Password::ALGO_DEFAULT, $opts ) );
+        $this->assertFalse( Password::needsRehash( $hash, null, $opts ) );
 
         $info = Password::getInfo( $hash );
         $this->assertEquals( Password::ALGO_BCRYPT, $info['algo'] );

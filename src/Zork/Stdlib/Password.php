@@ -4,6 +4,16 @@ namespace Zork\Stdlib;
 
 use Zend\Math\Rand;
 
+if ( ! defined( 'PASSWORD_BCRYPT' ) )
+{
+    define( 'PASSWORD_BCRYPT', 1 );
+}
+
+if ( ! defined( 'PASSWORD_DEFAULT' ) )
+{
+    define( 'PASSWORD_DEFAULT', PASSWORD_BCRYPT );
+}
+
 /**
  * Password
  *
@@ -17,22 +27,14 @@ class Password
      *
      * @const int
      */
-    const ALGO_DEFAULT = 0;
+    const ALGO_DEFAULT = PASSWORD_DEFAULT;
 
     /**
      * Blowfish algorithm
      *
      * @const int
      */
-    const ALGO_BCRYPT = 1;
-
-    /**
-     * @var array
-     */
-    protected static $algoMask = array(
-        self::ALGO_DEFAULT  => PASSWORD_DEFAULT,
-        self::ALGO_BCRYPT   => PASSWORD_BCRYPT,
-    );
+    const ALGO_BCRYPT = PASSWORD_BCRYPT;
 
     /**
      * Generate random salt for an algo-type
@@ -50,7 +52,6 @@ class Password
 
         switch ( $algo )
         {
-            case self::ALGO_DEFAULT:
             case self::ALGO_BCRYPT:
 
                 return Rand::getString(
@@ -89,20 +90,7 @@ class Password
 
         if ( function_exists( 'password_hash' ) )
         {
-            if ( ! array_key_exists( $algo, static::$algoMask ) )
-            {
-                throw new \InvalidArgumentException( sprintf(
-                    '%s: algorithm #%d not supported',
-                    __METHOD__,
-                    $algo
-                ) );
-            }
-
-            return password_hash(
-                $password,
-                static::$algoMask[$algo],
-                $options
-            );
+            return password_hash( $password, $algo, $options );
         }
 
         if ( empty( $options['salt'] ) )
@@ -112,9 +100,9 @@ class Password
 
         switch ( $algo )
         {
-            case self::ALGO_DEFAULT:
             case self::ALGO_BCRYPT:
 
+                // @codeCoverageIgnoreStart
                 if ( ! defined( 'CRYPT_BLOWFISH' ) )
                 {
                     throw new \RuntimeException( sprintf(
@@ -122,6 +110,7 @@ class Password
                         __METHOD__
                     ) );
                 }
+                // @codeCoverageIgnoreEnd
 
                 $cost = isset( $options['cost'] ) ? min( 31, max( 4, (int) $options['cost'] ) ) : 7;
                 $salt = ( version_compare( PHP_VERSION, '5.3.7' ) >= 0 ? '$2y' : '$2a' ) . '$'
@@ -168,7 +157,7 @@ class Password
      * @throws  \InvalidArgumentException
      */
     public static function needsRehash( $hash,
-                                        $algo          = self::ALGO_DEFAULT,
+                                        $algo          = null,
                                         array $options = array() )
     {
         if ( empty( $algo ) )
@@ -178,27 +167,14 @@ class Password
 
         if ( function_exists( 'password_needs_rehash' ) )
         {
-            if ( ! array_key_exists( $algo, static::$algoMask ) )
-            {
-                throw new \InvalidArgumentException( sprintf(
-                    '%s: algorithm #%d not supported',
-                    __METHOD__,
-                    $algo
-                ) );
-            }
-
-            return password_needs_rehash(
-                $hash,
-                static::$algoMask[$algo],
-                $options
-            );
+            return password_needs_rehash( $algo, $options );
         }
 
         switch ( $algo )
         {
-            case self::ALGO_DEFAULT:
             case self::ALGO_BCRYPT:
 
+                // @codeCoverageIgnoreStart
                 if ( ! defined( 'CRYPT_BLOWFISH' ) )
                 {
                     throw new \RuntimeException( sprintf(
@@ -206,6 +182,7 @@ class Password
                         __METHOD__
                     ) );
                 }
+                // @codeCoverageIgnoreEnd
 
                 $type = version_compare( PHP_VERSION, '5.3.7' ) >= 0 ? '$2y$' : '$2a$';
 
@@ -221,7 +198,7 @@ class Password
                 }
 
                 if ( isset( $options['salt'] ) &&
-                     ( (string) $options['salt'] ) != substr( $hash, 7, 22 ) )
+                     ( substr( $options['salt'], 0, 21 ) ) != substr( $hash, 7, 21 ) )
                 {
                     return true;
                 }
@@ -250,19 +227,7 @@ class Password
     {
         if ( function_exists( 'password_get_info' ) )
         {
-            static $algoMask = array(
-                PASSWORD_DEFAULT    => self::ALGO_DEFAULT,
-                PASSWORD_BCRYPT     => self::ALGO_BCRYPT,
-            );
-
-            $info = password_get_info( $hash );
-
-            if ( isset( $algoMask[$info['algo']] ) )
-            {
-                $info['algo'] = $algoMask[$info['algo']];
-            }
-
-            return $info;
+            return password_get_info( $hash );
         }
 
         if ( in_array( substr( $hash, 0, 4 ), array( '$2a$', '$2x$', '$2y$' ) ) )
@@ -271,7 +236,7 @@ class Password
                 'algo'      => self::ALGO_BCRYPT,
                 'algoName'  => 'Blowfish',
                 'options'   => array(
-                    'cost'  => (int) substr( $hash, 4, 2 ),
+                    'cost'  => (int) ltrim( substr( $hash, 4, 2 ), '0' ),
                     'salt'  => substr( $hash, 7, 22 ),
                 ),
             );
