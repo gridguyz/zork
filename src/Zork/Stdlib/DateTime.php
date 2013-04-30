@@ -4,8 +4,8 @@ namespace Zork\Stdlib;
 
 use ArrayAccess;
 use Traversable;
-use DateTime as Base;
 use Zend\Stdlib\ArrayUtils;
+use Zend\Stdlib\DateTime as Base;
 
 /**
  * DateTime
@@ -29,9 +29,11 @@ class DateTime extends Base implements ArrayAccess
     }
 
     /**
-     * @param string $defaultFormat
-     * @param bool $canUseConstant
-     * @return \Zork\Stdlib\DateTime
+     * Set default format
+     *
+     * @param   string $defaultFormat
+     * @param   bool $canUseConstant
+     * @return  \Zork\Stdlib\DateTime
      */
     public function setDefaultFormat( $defaultFormat, $canUseConstant = true )
     {
@@ -49,7 +51,9 @@ class DateTime extends Base implements ArrayAccess
     }
 
     /**
-     * @return string
+     * Convert to string (using default format)
+     *
+     * @return  string
      */
     public function __toString()
     {
@@ -58,6 +62,7 @@ class DateTime extends Base implements ArrayAccess
 
     /**
      * Whether a offset exists
+     * @codeCoverageIgnore
      *
      * @param   mixed   $offset An offset to check for.
      * @return  boolean         <b>TRUE</b> on success or <b>FALSE</b> on failure.
@@ -71,6 +76,7 @@ class DateTime extends Base implements ArrayAccess
 
     /**
      * Offset to retrieve
+     * @codeCoverageIgnore
      *
      * @param   mixed   $offset The offset to retrieve.
      * @return  mixed           Can return all value types.
@@ -83,6 +89,7 @@ class DateTime extends Base implements ArrayAccess
 
     /**
      * Offset to set
+     * @codeCoverageIgnore
      *
      * @param   mixed   $offset The offset to assign the value to.
      * @param   mixed   $value  The value to set.
@@ -96,6 +103,7 @@ class DateTime extends Base implements ArrayAccess
 
     /**
      * Offset to unset
+     * @codeCoverageIgnore
      *
      * @param   mixed   $offset The offset to unset.
      * @return  void            No value is returned.
@@ -143,7 +151,7 @@ class DateTime extends Base implements ArrayAccess
                 );
             }
 
-            if ( $date instanceof Base )
+            if ( $date instanceof \DateTime )
             {
                 if ( null === $min || $date < $min )
                 {
@@ -192,7 +200,7 @@ class DateTime extends Base implements ArrayAccess
                 );
             }
 
-            if ( $date instanceof Base )
+            if ( $date instanceof \DateTime )
             {
                 if ( null === $max || $date > $max )
                 {
