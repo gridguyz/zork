@@ -33,7 +33,7 @@ class Password
      * @return  string
      * @throws  \InvalidArgumentException
      */
-    public static function salt( $algo = self::ALGO_DEFAULT )
+    public static function salt( $algo = null )
     {
         if ( empty( $algo ) )
         {
@@ -71,9 +71,14 @@ class Password
      * @throws  \InvalidArgumentException
      */
     public static function hash( $password,
-                                 $algo          = self::ALGO_DEFAULT,
+                                 $algo          = null,
                                  array $options = array() )
     {
+        if ( empty( $algo ) )
+        {
+            $algo = self::ALGO_DEFAULT;
+        }
+
         if ( function_exists( 'password_hash' ) )
         {
             static $algoMask = array(
@@ -81,18 +86,20 @@ class Password
                 self::ALGO_BCRYPT   => PASSWORD_BCRYPT,
             );
 
+            if ( ! array_key_exists( $algo, $algoMask ) )
+            {
+                throw new \InvalidArgumentException( sprintf(
+                    '%s: algorithm #%d not supported',
+                    __METHOD__,
+                    $algo
+                ) );
+            }
+
             return password_hash(
                 $password,
-                array_key_exists( $algo, $algoMask )
-                    ? $algoMask[$algo]
-                    : PASSWORD_DEFAULT,
+                $algoMask[$algo],
                 $options
             );
-        }
-
-        if ( empty( $algo ) )
-        {
-            $algo = self::ALGO_DEFAULT;
         }
 
         if ( empty( $options['salt'] ) )
@@ -163,7 +170,7 @@ class Password
     {
         if ( function_exists( 'password_needs_rehash' ) )
         {
-            return password_verify( $hash, $algo, $options );
+            return password_needs_rehash( $hash, $algo, $options );
         }
 
         if ( empty( $algo ) )
