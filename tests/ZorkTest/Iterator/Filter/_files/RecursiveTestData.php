@@ -7,7 +7,7 @@ use RecursiveArrayIterator;
 /**
  * RecursiveTestData
  *
- * @author pozs
+ * @author David Pozsar <david.pozsar@megaweb.hu>
  */
 class RecursiveTestData extends RecursiveArrayIterator
 {

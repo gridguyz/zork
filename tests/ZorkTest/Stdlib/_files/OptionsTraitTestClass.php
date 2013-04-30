@@ -7,7 +7,7 @@ use Zork\Stdlib\OptionsTrait;
 /**
  * ZorkTest\Stdlib\OptionsTraitTestClass
  *
- * @author pozs
+ * @author David Pozsar <david.pozsar@megaweb.hu>
  */
 class OptionsTraitTestClass
 {

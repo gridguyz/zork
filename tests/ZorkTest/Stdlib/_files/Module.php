@@ -7,7 +7,7 @@ use Zork\Stdlib\ModuleAbstract;
 /**
  * TestModule\Module
  *
- * @author pozs
+ * @author David Pozsar <david.pozsar@megaweb.hu>
  */
 class Module extends ModuleAbstract
 {

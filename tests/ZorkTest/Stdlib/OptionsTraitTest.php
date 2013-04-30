@@ -7,7 +7,7 @@ use PHPUnit_Framework_TestCase as TestCase;
 /**
  * OptionsTraitTest
  *
- * @author pozs
+ * @author David Pozsar <david.pozsar@megaweb.hu>
  * @covers Zork\Stdlib\OptionsTrait
  */
 class OptionsTraitTest extends TestCase

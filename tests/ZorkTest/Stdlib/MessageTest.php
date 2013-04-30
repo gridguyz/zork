@@ -8,7 +8,7 @@ use PHPUnit_Framework_TestCase as TestCase;
 /**
  * MessageTest
  *
- * @author pozs
+ * @author David Pozsar <david.pozsar@megaweb.hu>
  * @covers Zork\Message
  */
 class MessageTest extends TestCase

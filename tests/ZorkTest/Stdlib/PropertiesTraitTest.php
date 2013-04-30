@@ -7,7 +7,7 @@ use PHPUnit_Framework_TestCase as TestCase;
 /**
  * PropertiesTraitTest
  *
- * @author pozs
+ * @author David Pozsar <david.pozsar@megaweb.hu>
  * @covers Zork\Stdlib\PropertiesTrait
  */
 class PropertiesTraitTest extends TestCase

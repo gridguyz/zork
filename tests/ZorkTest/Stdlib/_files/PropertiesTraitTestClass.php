@@ -7,7 +7,7 @@ use Zork\Stdlib\PropertiesTrait;
 /**
  * Zork\Stdlib\PropertiesTraitTestClass
  *
- * @author pozs
+ * @author David Pozsar <david.pozsar@megaweb.hu>
  */
 class PropertiesTraitTestClass
 {

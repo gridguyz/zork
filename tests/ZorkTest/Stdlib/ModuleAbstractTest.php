@@ -8,7 +8,7 @@ use PHPUnit_Framework_TestCase as TestCase;
 /**
  * ModuleAbstractTest
  *
- * @author pozs
+ * @author David Pozsar <david.pozsar@megaweb.hu>
  * @covers Zork\ModuleAbstract
  */
 class ModuleAbstractTest extends TestCase

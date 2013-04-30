@@ -9,7 +9,7 @@ use PHPUnit_Framework_TestCase as TestCase;
 /**
  * PropertiesTest
  *
- * @author pozs
+ * @author David Pozsar <david.pozsar@megaweb.hu>
  * @covers Zork\Iterator\Filter\Properties
  * @covers Zork\Iterator\Filter\PropertiesTrait
  */
