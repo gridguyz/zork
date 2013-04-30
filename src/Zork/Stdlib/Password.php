@@ -27,6 +27,14 @@ class Password
     const ALGO_BCRYPT = 1;
 
     /**
+     * @var array
+     */
+    protected static $algoMask = array(
+        self::ALGO_DEFAULT  => PASSWORD_DEFAULT,
+        self::ALGO_BCRYPT   => PASSWORD_BCRYPT,
+    );
+
+    /**
      * Generate random salt for an algo-type
      *
      * @param   int     $algo
@@ -81,12 +89,7 @@ class Password
 
         if ( function_exists( 'password_hash' ) )
         {
-            static $algoMask = array(
-                self::ALGO_DEFAULT  => PASSWORD_DEFAULT,
-                self::ALGO_BCRYPT   => PASSWORD_BCRYPT,
-            );
-
-            if ( ! array_key_exists( $algo, $algoMask ) )
+            if ( ! array_key_exists( $algo, static::$algoMask ) )
             {
                 throw new \InvalidArgumentException( sprintf(
                     '%s: algorithm #%d not supported',
@@ -97,7 +100,7 @@ class Password
 
             return password_hash(
                 $password,
-                $algoMask[$algo],
+                static::$algoMask[$algo],
                 $options
             );
         }
@@ -168,14 +171,27 @@ class Password
                                         $algo          = self::ALGO_DEFAULT,
                                         array $options = array() )
     {
-        if ( function_exists( 'password_needs_rehash' ) )
-        {
-            return password_needs_rehash( $hash, $algo, $options );
-        }
-
         if ( empty( $algo ) )
         {
             $algo = self::ALGO_DEFAULT;
+        }
+
+        if ( function_exists( 'password_needs_rehash' ) )
+        {
+            if ( ! array_key_exists( $algo, static::$algoMask ) )
+            {
+                throw new \InvalidArgumentException( sprintf(
+                    '%s: algorithm #%d not supported',
+                    __METHOD__,
+                    $algo
+                ) );
+            }
+
+            return password_needs_rehash(
+                $hash,
+                static::$algoMask[$algo],
+                $options
+            );
         }
 
         switch ( $algo )
