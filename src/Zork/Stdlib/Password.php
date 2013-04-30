@@ -168,7 +168,7 @@ class Password
 
         if ( function_exists( 'password_needs_rehash' ) )
         {
-            ErrorHandler::start();
+            ErrorHandler::start( E_ALL );
             $hash   = password_needs_rehash( $hash, $algo, $options );
             $error  = ErrorHandler::stop();
 
