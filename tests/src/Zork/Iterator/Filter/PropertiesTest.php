@@ -1,9 +1,8 @@
 <?php
 
-namespace ZorkTest\Iterator\Filter;
+namespace Zork\Iterator\Filter;
 
 use ArrayIterator;
-use Zork\Iterator\Filter\Properties;
 use PHPUnit_Framework_TestCase as TestCase;
 
 /**
@@ -88,8 +87,8 @@ class PropertiesTest extends TestCase
     public function testAddProperties()
     {
         $this->properties
-             ->addProperties( array(
-                 'foo ='    => 1,
+             ->setProperties( array(
+                 'foo'      => 1,
                  'bar ~'    => '/2|3/',
                  'baz <>'   => 3,
              ) );
@@ -111,7 +110,7 @@ class PropertiesTest extends TestCase
     public function testFilterEqual()
     {
         $this->properties
-             ->addProperties( array(
+             ->setProperties( array(
                     'foo =' => '1',
                     'bar =' => '2',
                     'baz =' => '3',
@@ -137,7 +136,7 @@ class PropertiesTest extends TestCase
     public function testFilterIdentical()
     {
         $this->properties
-             ->addProperties( array(
+             ->setProperties( array(
                     'foo ===' => 1,
                     'bar ===' => 2,
                     'baz ===' => 3,
@@ -163,7 +162,7 @@ class PropertiesTest extends TestCase
     public function testFilterRegexp()
     {
         $this->properties
-             ->addProperties( array(
+             ->setProperties( array(
                     'foo ~' => '/^1$/',
                     'bar ~' => '/^1|4$/',
                     'baz ~' => '/^1/',
@@ -189,7 +188,7 @@ class PropertiesTest extends TestCase
     public function testFilterNotEqual()
     {
         $this->properties
-             ->addProperties( array(
+             ->setProperties( array(
                     'foo <>' => 2,
                     'bar <>' => 2,
                     'baz !=' => 6,
@@ -215,7 +214,7 @@ class PropertiesTest extends TestCase
     public function testFilterNotIdentical()
     {
         $this->properties
-             ->addProperties( array(
+             ->setProperties( array(
                     'foo !==' => 2,
                     'bar !==' => 2,
                     'baz !==' => 6,
@@ -241,7 +240,7 @@ class PropertiesTest extends TestCase
     public function testFilterNotReqexp()
     {
         $this->properties
-             ->addProperties( array(
+             ->setProperties( array(
                     'foo !~' => '/^2|3$/',
                     'bar !~' => '/^2|3$/',
                     'baz !~' => '/^2|3$/',
@@ -267,7 +266,7 @@ class PropertiesTest extends TestCase
     public function testFilterGreaterThan()
     {
         $this->properties
-             ->addProperties( array(
+             ->setProperties( array(
                     'foo >' => 0,
                     'bar >' => 2,
                     'baz >' => 6,
@@ -293,7 +292,7 @@ class PropertiesTest extends TestCase
     public function testFilterGreaterEqual()
     {
         $this->properties
-             ->addProperties( array(
+             ->setProperties( array(
                     'foo >=' => 1,
                     'bar >=' => 3,
                     'baz >=' => 9,
@@ -319,7 +318,7 @@ class PropertiesTest extends TestCase
     public function testFilterLesserThan()
     {
         $this->properties
-             ->addProperties( array(
+             ->setProperties( array(
                     'foo <' => 2,
                     'bar <' => 2,
                     'baz <' => 2,
@@ -345,7 +344,7 @@ class PropertiesTest extends TestCase
     public function testFilterLesserEqual()
     {
         $this->properties
-             ->addProperties( array(
+             ->setProperties( array(
                     'foo <=' => 1,
                     'bar <=' => 1,
                     'baz <=' => 1,
@@ -371,7 +370,7 @@ class PropertiesTest extends TestCase
     public function testFilterCallback()
     {
         $this->properties
-             ->addProperties( array(
+             ->setProperties( array(
                     'foo ()' => array( $this, 'callbackFoo' ),
                     'bar ()' => array( $this, 'callbackBar' ),
                     'baz ()' => array( $this, 'callbackBaz' ),

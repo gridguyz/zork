@@ -1,9 +1,8 @@
 <?php
 
-namespace ZorkTest\Iterator\Filter;
+namespace Zork\Iterator\Filter;
 
 use RecursiveIteratorIterator;
-use Zork\Iterator\Filter\RecursiveProperties;
 use PHPUnit_Framework_TestCase as TestCase;
 
 /**

@@ -4,15 +4,13 @@ namespace Zork\Iterator;
 
 use Traversable;
 use ArrayIterator;
-use OuterIterator;
 
 /**
- * \Zork\Iterator\SortIterator
+ * SortIterator
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
  */
 class SortIterator extends ArrayIterator
-                implements OuterIterator
 {
 
     /**
@@ -51,47 +49,23 @@ class SortIterator extends ArrayIterator
     const SORT_CMP_DEFAULT     = self::SORT_CMP_OPERATOR;
 
     /**
-     * Inner iterator
-     *
-     * @var Iterator|array
-     */
-    protected $innerIterator = null;
-
-    /**
-     * Get inner-iterator
-     *
-     * @return Iterator
-     */
-    public function getInnerIterator()
-    {
-        if ( is_array( $this->innerIterator ) )
-        {
-            return new ArrayIterator( $this->innerIterator );
-        }
-
-        return $this->innerIterator;
-    }
-
-    /**
      * Constructor
      *
-     * @param array|\Traversable $iterator
-     * @param int|callable $sortCmp
-     * @param int $sortBy ignored if $sortCmp = self::SORT_CMP_NATURAL(CASE)?
+     * @param   array|\Traversable  $iterator
+     * @param   int|callable        $sortCmp
+     * @param   int                 $sortBy ignored if $sortCmp = self::SORT_CMP_NATURAL(CASE)?
      */
     public function __construct( $iterator,
-            $sortCmp    = self::SORT_CMP_DEFAULT,
-            $sortBy     = self::SORT_BY_DEFAULT )
+                                 $sortCmp   = self::SORT_CMP_DEFAULT,
+                                 $sortBy    = self::SORT_BY_DEFAULT )
     {
         if ( $iterator instanceof Traversable )
         {
-            $this->innerIterator = $iterator;
             $iterator = iterator_to_array( $iterator );
         }
         else
         {
             $iterator = (array) $iterator;
-            $this->innerIterator = array_merge( array(), $iterator );
         }
 
         parent::__construct( $iterator );
@@ -101,9 +75,9 @@ class SortIterator extends ArrayIterator
     /**
      * Sort data
      *
-     * @param int|callable $sortCmp
-     * @param int $sortBy ignored if $sortCmp = self::SORT_CMP_NATURAL(CASE)?
-     * @return Zork_SortIterator
+     * @param   int|callable    $sortCmp
+     * @param   int             $sortBy
+     * @return  SortIterator
      */
     public function sort( $sortCmp  = self::SORT_CMP_DEFAULT,
                           $sortBy   = self::SORT_BY_DEFAULT )
@@ -126,11 +100,31 @@ class SortIterator extends ArrayIterator
                     break;
 
                 case self::SORT_CMP_NATURAL:
-                    $method[] = 'natsort';
+
+                    if ( $key )
+                    {
+                        $method[] = 'uksort';
+                        $args[]   = 'strnatcmp';
+                    }
+                    else
+                    {
+                        $method[] = 'natsort';
+                    }
+
                     break;
 
                 case self::SORT_CMP_NATURALCASE:
-                    $method[] = 'natcasesort';
+
+                    if ( $key )
+                    {
+                        $method[] = 'uksort';
+                        $args[]   = 'strnatcasecmp';
+                    }
+                    else
+                    {
+                        $method[] = 'natcasesort';
+                    }
+
                     break;
             }
         }

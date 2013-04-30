@@ -1,15 +1,14 @@
 <?php
 
-namespace ZorkTest\Stdlib;
+namespace Zork\Stdlib;
 
-use Zork\Stdlib\Message;
 use PHPUnit_Framework_TestCase as TestCase;
 
 /**
  * MessageTest
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
- * @covers Zork\Message
+ * @covers Zork\Stdlib\Message
  */
 class MessageTest extends TestCase
 {

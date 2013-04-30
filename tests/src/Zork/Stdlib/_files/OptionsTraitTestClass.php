@@ -1,11 +1,9 @@
 <?php
 
-namespace ZorkTest\Stdlib;
-
-use Zork\Stdlib\OptionsTrait;
+namespace Zork\Stdlib;
 
 /**
- * ZorkTest\Stdlib\OptionsTraitTestClass
+ * Zork\Stdlib\OptionsTraitTestClass
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
  */

@@ -1,6 +1,6 @@
 <?php
 
-namespace ZorkTest\Stdlib;
+namespace Zork\Stdlib;
 
 use TestModule\Module;
 use PHPUnit_Framework_TestCase as TestCase;
@@ -9,7 +9,7 @@ use PHPUnit_Framework_TestCase as TestCase;
  * ModuleAbstractTest
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
- * @covers Zork\ModuleAbstract
+ * @covers Zork\Stdlib\ModuleAbstract
  */
 class ModuleAbstractTest extends TestCase
 {

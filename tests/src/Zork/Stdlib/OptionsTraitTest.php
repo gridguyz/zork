@@ -1,6 +1,6 @@
 <?php
 
-namespace ZorkTest\Stdlib;
+namespace Zork\Stdlib;
 
 use PHPUnit_Framework_TestCase as TestCase;
 

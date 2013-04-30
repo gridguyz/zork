@@ -91,6 +91,7 @@ abstract class MapIterator implements Countable, OuterIterator
      */
     public function next()
     {
+        $this->keySeq++;
         return $this->innerIterator->next();
     }
 
@@ -103,7 +104,7 @@ abstract class MapIterator implements Countable, OuterIterator
     {
         if ( $this->flags & self::FLAG_GENERATE_KEYS )
         {
-            return $this->keySeq++;
+            return $this->keySeq;
         }
 
         return $this->innerIterator->key();
@@ -127,6 +128,7 @@ abstract class MapIterator implements Countable, OuterIterator
      */
     public function rewind()
     {
+        $this->keySeq = 0;
         return $this->innerIterator->rewind();
     }
 

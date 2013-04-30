@@ -1,6 +1,6 @@
 <?php
 
-namespace ZorkTest\Iterator\Filter;
+namespace Zork\Iterator\Filter;
 
 use RecursiveArrayIterator;
 

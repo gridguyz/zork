@@ -1,8 +1,6 @@
 <?php
 
-namespace ZorkTest\Stdlib;
-
-use Zork\Stdlib\PropertiesTrait;
+namespace Zork\Stdlib;
 
 /**
  * Zork\Stdlib\PropertiesTraitTestClass
