@@ -10,5 +10,7 @@ matrix:
 
 install: composer install --no-dev
 
+script: phpunit --bootstrap tests/Bootstrap.php tests
+
 notifications:
   email: false
