@@ -8,6 +8,7 @@ use PHPUnit_Framework_TestCase as TestCase;
  * DepthListTest
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
+ * @covers Zork\Iterator\DepthList
  */
 class DepthListTest extends TestCase
 {

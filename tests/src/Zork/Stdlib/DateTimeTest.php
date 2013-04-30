@@ -9,6 +9,7 @@ use PHPUnit_Framework_TestCase as TestCase;
  * DateTimeTest
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
+ * @covers Zork\Stdlib\DateTime
  */
 class DateTimeTest extends TestCase
 {

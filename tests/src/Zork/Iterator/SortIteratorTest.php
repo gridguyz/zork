@@ -9,6 +9,7 @@ use PHPUnit_Framework_TestCase as TestCase;
  * SortIteratorTest
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
+ * @covers Zork\Iterator\SortIterator
  */
 class SortIteratorTest extends TestCase
 {
