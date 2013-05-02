@@ -59,7 +59,7 @@ class Xlsx extends TabularAbstract
     /**
      * Encode a row
      *
-     * @param   array|\Traversable  $row
+     * @param   array   $row
      * @return  string
      */
     protected function encodeRow( $row )

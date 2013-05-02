@@ -17,6 +17,17 @@ class TransformTest extends TestCase
     /**
      * Test transform to string
      */
+    public function testIdentical()
+    {
+        $this->assertSame( null, Transform::identical( null ) );
+        $this->assertSame( false, Transform::identical( false ) );
+        $this->assertSame( 0, Transform::identical( 0 ) );
+        $this->assertSame( '0', Transform::identical( '0' ) );
+    }
+
+    /**
+     * Test transform to string
+     */
     public function testToString()
     {
         $this->assertSame( '0', Transform::toString( 0 ) );

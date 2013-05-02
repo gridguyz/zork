@@ -40,7 +40,7 @@ class Csv extends TabularAbstract
     /**
      * @var array
      */
-    protected static $eolAliases = array(
+    public static $eolAliases = array(
         'windows'   => "\n\r",
         'linux'     => "\n",
         'macos'     => "\r",
@@ -49,7 +49,7 @@ class Csv extends TabularAbstract
     /**
      * @var array
      */
-    protected static $separatorAliases = array(
+    public static $separatorAliases = array(
         'comma'     => ',',
         'semicolon' => ';',
         'tab'       => "\t",
@@ -109,7 +109,7 @@ class Csv extends TabularAbstract
      */
     protected function encodeValue( $value )
     {
-        if ( empty( $value ) )
+        if ( null === $value || '' === $value || false === $value )
         {
             return '';
         }
@@ -142,20 +142,19 @@ class Csv extends TabularAbstract
     /**
      * Encode a row
      *
-     * @param   array|\Traversable  $row
+     * @param   array   $row
      * @return  string
      */
     protected function encodeRow( $row )
     {
-        if ( $row instanceof Traversable )
-        {
-            $row = iterator_to_array( $row );
-        }
-
-        return implode( $this->separator,
-                        array_map( array( $this, 'encodeValue' ),
-                                   (array) $row ) )
-             . $this->eol;
+        return implode(
+                $this->separator,
+                array_map(
+                    array( $this, 'encodeValue' ),
+                    (array) $row
+                )
+            )
+          . $this->eol;
     }
 
 }

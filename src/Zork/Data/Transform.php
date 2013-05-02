@@ -16,6 +16,15 @@ class Transform
 
     /**
      * @param   mixed   $value
+     * @return  mixed
+     */
+    public static function identical( $value )
+    {
+        return $value;
+    }
+
+    /**
+     * @param   mixed   $value
      * @return  string
      */
     public static function toString( $value )

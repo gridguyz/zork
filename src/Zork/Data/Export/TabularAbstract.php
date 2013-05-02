@@ -22,7 +22,7 @@ abstract class TabularAbstract extends FileData
     /**
      * @var array
      */
-    protected $fieldsNames = array();
+    protected $fieldNames = array();
 
     /**
      * @var bool
@@ -58,6 +58,26 @@ abstract class TabularAbstract extends FileData
     }
 
     /**
+     * Get all field names
+     *
+     * @return  array
+     */
+    public function getAllFieldNames()
+    {
+        $names = array_combine( $this->fields, $this->fields );
+
+        foreach ( $names as $field => &$name )
+        {
+            if ( isset( $this->fieldNames[$field] ) )
+            {
+                $name = $this->fieldNames[$field];
+            }
+        }
+
+        return $names;
+    }
+
+    /**
      * @return bool
      */
     public function getSendHeaders()
@@ -90,7 +110,7 @@ abstract class TabularAbstract extends FileData
     /**
      * Encode a row
      *
-     * @param   array|\Traversable  $row
+     * @param   array   $row
      * @return  string
      */
     abstract protected function encodeRow( $row );
@@ -103,7 +123,10 @@ abstract class TabularAbstract extends FileData
     public function rewind()
     {
         $this->headersSent = false;
-        return parent::rewind();
+        $result = parent::rewind();
+        $this->fields = $this->getInnerIterator()
+                             ->getFieldNames();
+        return $result;
     }
 
     /**
@@ -141,7 +164,7 @@ abstract class TabularAbstract extends FileData
     {
         if ( $this->sendHeaders && ! $this->headersSent )
         {
-            $data = $this->fieldNames;
+            $data = $this->getAllFieldNames();
         }
         else
         {
@@ -152,7 +175,7 @@ abstract class TabularAbstract extends FileData
 
         foreach ( $this->fields as $field )
         {
-            $fields[] = $data[$field];
+            $fields[] = isset( $data[$field] ) ? $data[$field] : null;
         }
 
         return $this->encodeRow( $fields );

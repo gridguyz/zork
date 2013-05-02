@@ -21,6 +21,11 @@ class Table implements OuterIterator,
     /**
      * @const string
      */
+    const IDENTICAL = 'Zork\Data\Transform::identical';
+
+    /**
+     * @const string
+     */
     const STRING    = 'Zork\Data\Transform::toString';
 
     /**
@@ -107,7 +112,7 @@ class Table implements OuterIterator,
     {
         if ( is_object( $data ) && method_exists( $data, 'getOption' ) )
         {
-            return $data->$name ?: $data->getOption( $name );
+            return ( isset( $data->$name ) ? $data->$name : null ) ?: $data->getOption( $name );
         }
         else if ( is_array( $data ) || $data instanceof ArrayAccess )
         {
