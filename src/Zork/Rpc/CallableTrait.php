@@ -3,6 +3,7 @@
 namespace Zork\Rpc;
 
 use ReflectionObject;
+use ReflectionException;
 use Zend\Stdlib\ArrayUtils;
 
 /**
@@ -42,16 +43,30 @@ trait CallableTrait
         }
 
         $args   = array();
-        $refObj = new ReflectionObject( $this );
-        $refMet = $refObj->getMethod( $name );
         $params = ArrayUtils::iteratorToArray( $params );
+        $refObj = new ReflectionObject( $this );
+
+        try
+        {
+            $refMet = $refObj->getMethod( $name );
+        }
+        catch ( ReflectionException $ex )
+        {
+            throw new Exception\BadMethodCallException(
+                get_called_class() . '::' . $name .
+                '() is not a valid method',
+                0, $ex
+            );
+        }
 
         if ( empty( $refMet ) )
         {
+            // @codeCoverageIgnoreStart
             throw new Exception\BadMethodCallException(
                 get_called_class() . '::' . $name .
                 '() is not a valid method'
             );
+            // @codeCoverageIgnoreEnd
         }
         else
         {
