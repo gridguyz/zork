@@ -114,13 +114,18 @@ class Alternate extends AbstractValidator
         {
             $token = $context[$this->getToken()];
         }
-        else
+        else if ( $value === '' || $value === null )
         {
             $this->error( self::MISSING_TOKEN );
             return false;
         }
+        else
+        {
+            return true;
+        }
 
-        if ( empty( $value ) && empty( $token ) )
+        if ( ( $value === '' || $value === null ) &&
+             ( $token === '' || $token === null ) )
         {
             $this->error( self::NONE_PROVIDED );
             return false;
@@ -128,4 +133,5 @@ class Alternate extends AbstractValidator
 
         return true;
     }
+
 }

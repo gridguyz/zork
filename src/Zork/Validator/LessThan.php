@@ -159,7 +159,8 @@ class LessThan extends AbstractValidator
             return false;
         }
 
-        if ( ! empty( $value ) && ! empty( $token ) )
+        if ( ! ( $value === '' || $value === null ) &&
+             ! ( $token === '' || $token === null ) )
         {
             if ( $this->getEqual() )
             {

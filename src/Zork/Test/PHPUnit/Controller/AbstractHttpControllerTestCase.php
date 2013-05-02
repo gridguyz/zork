@@ -17,7 +17,7 @@ class AbstractHttpControllerTestCase extends BaseTestCase
      *
      * @var string
      */
-    protected $applicationConfigPath = 'config/application.config.php';
+    protected $applicationConfigPath = 'config/application.php';
 
     /**
      * Set config & reset the application for isolation
