@@ -53,6 +53,14 @@ class FileData implements Iterator,
             $iterator = $iterator->getIterator();
         }
 
+        if ( ! $iterator instanceof Iterator )
+        {
+            throw new Exception\InvalidArgumentException( sprintf(
+                '%s: $iterator must be an array, or an instance of \Traversable',
+                __METHOD__
+            ) );
+        }
+
         $this->iterator = $iterator;
         $this->mimeType = static::DEFAULT_MIMETYPE;
 

@@ -66,6 +66,38 @@ class Transform
 
     /**
      * @param   mixed   $value
+     * @return  DateTime
+     */
+    public static function toDateTime( $value )
+    {
+        if ( $value instanceof DateTime )
+        {
+            return $value;
+        }
+
+        if ( $value instanceof \DateTime )
+        {
+            return DateTime::createFromFormat(
+                DateTime::ISO8601,
+                $value->format( DateTime::ISO8601 )
+            );
+        }
+
+        if ( ! is_scalar( $value ) )
+        {
+            $value = (string) $value;
+        }
+
+        if ( is_numeric( $value ) )
+        {
+            return new DateTime( '@' . $value );
+        }
+
+        return new DateTime( $value );
+    }
+
+    /**
+     * @param   mixed   $value
      * @return  callable
      * @throws  Exception\InvalidArgumentException
      */
@@ -98,34 +130,6 @@ class Transform
             __METHOD__,
             is_object( $value ) ? get_class( $value ) : gettype( $value )
         ) );
-    }
-
-    public static function toDateTime( $value )
-    {
-        if ( $value instanceof DateTime )
-        {
-            return $value;
-        }
-
-        if ( $value instanceof \DateTime )
-        {
-            return DateTime::createFromFormat(
-                DateTime::ISO8601,
-                $value->format( DateTime::ISO8601 )
-            );
-        }
-
-        if ( ! is_scalar( $value ) )
-        {
-            $value = (string) $value;
-        }
-
-        if ( is_numeric( $value ) )
-        {
-            return new DateTime( '@' . $value );
-        }
-
-        return new DateTime( $value );
     }
 
 }

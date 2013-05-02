@@ -29,6 +29,30 @@ class DateTimeTest extends TestCase
     }
 
     /**
+     * Test set-state
+     */
+    public function testSetState()
+    {
+        $native     = new \DateTime;
+        $dateObject = DateTime::__set_state( (array) $native );
+
+        $this->assertInstanceOf( 'Zork\Stdlib\DateTime', $dateObject );
+        $this->assertSame( $native->format( \DateTime::ISO8601 ), $dateObject->format( DateTime::ISO8601 ) );
+    }
+
+    /**
+     * Test create from format
+     */
+    public function testCreateFromFormat()
+    {
+        $dateString = date( DATE_ISO8601 );
+        $dateObject = DateTime::createFromFormat( DateTime::ISO8601, $dateString );
+
+        $this->assertInstanceOf( 'Zork\Stdlib\DateTime', $dateObject );
+        $this->assertSame( $dateString, $dateObject->format( DateTime::ISO8601 ) );
+    }
+
+    /**
      * Helper for min/max search
      *
      * @return  array

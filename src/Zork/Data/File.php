@@ -69,11 +69,13 @@ class File implements Iterator,
         static $finfo;
         $mime = null;
 
+        // @codeCoverageIgnoreStart
         if ( function_exists( 'mime_content_type' ) &&
              ini_get( 'mime_magic.magicfile' ) )
         {
             $mime = mime_content_type( $this->pathname );
         }
+        // @codeCoverageIgnoreEnd
 
         if ( null === $mime &&
              class_exists( 'finfo', false ) )
