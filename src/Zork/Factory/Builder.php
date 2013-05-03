@@ -54,6 +54,7 @@ class Builder
             return false;
         }
 
+        // @codeCoverageIgnoreStart
         if ( ! interface_exists( $type ) )
         {
             return false;
@@ -61,6 +62,7 @@ class Builder
 
         $r = new ReflectionClass( $className );
         return $r->implementsInterface( $type );
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -175,7 +177,7 @@ class Builder
             $factory = get_class( $factory );
         }
 
-        return isset( $this->_factories[$factory] );
+        return isset( $this->factories[$factory] );
     }
 
     /**

@@ -8,6 +8,8 @@ use DateTime;
  * JsValue
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
+ * @codeCoverageIgnore
+ * @deprecated
  */
 class JsValue
 {
