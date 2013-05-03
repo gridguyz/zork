@@ -191,7 +191,7 @@ class ImageTest extends TestCase
          // TODO: cannot match the whole file, because the result is platform-dependent
          // $this->assertFileEquals( __DIR__ . '/_files/' . $file, __DIR__ . '/_files/~' . $file );
 
-            $originalInfo = getimagesize( __DIR__ . '/_files/~' . $file );
+            $originalInfo = getimagesize( __DIR__ . '/_files/' . $file );
             $renderedInfo = getimagesize( __DIR__ . '/_files/~' . $file );
 
             $this->assertSame(
