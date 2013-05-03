@@ -8,6 +8,7 @@ use PHPUnit_Framework_TestCase as TestCase;
  * FileTest
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
+ * @covers Zork\Data\File
  */
 class FileTest extends TestCase
 {

@@ -8,6 +8,7 @@ use PHPUnit_Framework_TestCase as TestCase;
  * TableTest
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
+ * @covers Zork\Data\Table
  */
 class TableTest extends TestCase
 {

@@ -9,6 +9,7 @@ use PHPUnit_Framework_TestCase as TestCase;
  * FileDataTest
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
+ * @covers Zork\Data\FileData
  */
 class FileDataTest extends TestCase
 {

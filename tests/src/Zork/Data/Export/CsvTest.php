@@ -10,6 +10,7 @@ use PHPUnit_Framework_TestCase as TestCase;
  * CsvTest
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
+ * @covers Zork\Data\Export\Csv
  */
 class CsvTest extends TestCase
 {

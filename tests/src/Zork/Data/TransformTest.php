@@ -10,6 +10,7 @@ use PHPUnit_Framework_TestCase as TestCase;
  * TransformTest
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
+ * @covers Zork\Data\Transform
  */
 class TransformTest extends TestCase
 {
