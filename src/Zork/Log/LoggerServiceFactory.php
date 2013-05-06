@@ -11,12 +11,14 @@ class LoggerServiceFactory implements FactoryInterface
     /**
      * Create the locale-service
      *
-     * @param \Zend\ServiceManager\ServiceLocatorInterface $serviceLocator
-     * @return \Zork\Log\LogManager
+     * @param   \Zend\ServiceManager\ServiceLocatorInterface $serviceLocator
+     * @return  \Zork\Log\LoggerManager
      */
     public function createService( ServiceLocatorInterface $serviceLocator )
     {
-        return LoggerManager::factory( $serviceLocator );
+        $config     = $serviceLocator->get( 'Configuration' );
+        $srvConfig  = isset( $config['log'] ) ? $config['log'] : array();
+        return new LoggerManager( $srvConfig, $serviceLocator );
     }
 
 }

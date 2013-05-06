@@ -23,9 +23,9 @@ class ServiceTest extends TestCase
     protected $dataConfig = array(
         'mail' => array(
             'transport' => array(
-                'type'      => 'Zork\Mail\ServiceTest\TransportTest',
+                'type'      => 'Zork\Mail\Transport\Callback',
                 'options'   => array(
-                    'type'      => 'Zork\Mail\ServiceTest\TransportTestOptions',
+                    'type'      => 'Zork\Mail\Transport\CallbackOptions',
                     'options'   => array(
                         'callback'  => array( __CLASS__, 'sendHandler' ),
                     ),
@@ -47,16 +47,6 @@ class ServiceTest extends TestCase
     protected $serviceManager;
 
     /**
-     * This method is called before the first test of this test class is run
-     */
-    public static function setUpBeforeClass()
-    {
-        parent::setUpBeforeClass();
-
-        include_once __DIR__ . '/_files/ServiceTestClasses.php';
-    }
-
-    /**
      * @var int
      */
     protected static $sent = 0;
@@ -71,7 +61,7 @@ class ServiceTest extends TestCase
     {
         static::$sent++;
         static::assertInstanceOf( 'Zend\Mail\Message', $message );
-        static::assertInstanceOf( 'Zork\Mail\ServiceTest\TransportTest', $transport );
+        static::assertInstanceOf( 'Zork\Mail\Transport\Callback', $transport );
     }
 
     /**
@@ -110,7 +100,7 @@ class ServiceTest extends TestCase
     {
         $service = $this->serviceManager->get( 'Zork\Mail\Service' );
         $this->assertInstanceOf( 'Zork\Mail\Service', $service );
-        $this->assertInstanceOf( 'Zork\Mail\ServiceTest\TransportTest', $service->getTransport() );
+        $this->assertInstanceOf( 'Zork\Mail\Transport\Callback', $service->getTransport() );
 
         $this->assertEquals(
             array(

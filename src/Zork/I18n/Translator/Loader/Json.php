@@ -12,6 +12,8 @@ use Zend\I18n\Translator\Loader\FileLoaderInterface;
  * Json file-loader
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
+ * @codeCoverageIgnore
+ * @deprecated
  */
 class Json implements FileLoaderInterface
 {

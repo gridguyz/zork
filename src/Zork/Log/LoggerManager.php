@@ -2,8 +2,8 @@
 
 namespace Zork\Log;
 
-use InvalidArgumentException;
 use Zend\Log\Logger;
+use Zend\Log\Exception;
 use Zend\Log\Writer\WriterInterface;
 use Zend\ServiceManager\ServiceManager;
 use Zend\ServiceManager\ServiceLocatorInterface;
@@ -22,45 +22,26 @@ class LoggerManager
     protected $serviceLocator;
 
     /**
-     * @param array|\Zend\ServiceManager\ServiceLocatorInterface $config
-     * @return \Zork\Log\LoggerManager
+     * @param   array                                           $config
+     * @param   \Zend\ServiceManager\ServiceLocatorInterface    $serviceLocator
      */
-    public static function factory( $config = null )
+    public function __construct( array $config = null,
+                                 ServiceLocatorInterface $serviceLocator = null )
     {
-        return new static( $config );
-    }
-
-    /**
-     * @param array|\Zend\ServiceManager\ServiceLocatorInterface $config
-     */
-    public function __construct( $config = null )
-    {
-        if ( is_array( $config ) )
+        if ( ! empty( $config ) )
         {
             $this->setConfig( $config );
         }
-        elseif ( $config instanceof ServiceLocatorInterface )
-        {
-            $this->setServiceLocator( $config );
-            $config = $config->get('Configuration');
 
-            if ( isset( $config['log'] ) )
-            {
-                $this->setConfig( (array) $config['log'] );
-            }
-        }
-        else if( $config != null )
+        if ( ! empty( $serviceLocator ) )
         {
-            throw new InvalidArgumentException(
-                'The config must be null, array or ' .
-                'instanceof \Zend\ServiceManager\ServiceLocatorInterface'
-            );
+            $this->setServiceLocator( $serviceLocator );
         }
     }
 
     /**
-     * @param array $config
-     * @return \Zork\Log\LoggerManager
+     * @param   array   $config
+     * @return  \Zork\Log\LoggerManager
      */
     public function setConfig( array $config )
     {
@@ -69,8 +50,8 @@ class LoggerManager
     }
 
     /**
-     * @param \Zend\ServiceManager\ServiceLocatorInterface $serviceLocator
-     * @return \Zork\Log\LoggerManager
+     * @param   \Zend\ServiceManager\ServiceLocatorInterface    $serviceLocator
+     * @return  \Zork\Log\LoggerManager
      */
     public function setServiceLocator( ServiceLocatorInterface $serviceLocator )
     {
@@ -79,9 +60,9 @@ class LoggerManager
     }
 
     /**
-     * @param string $type
-     * @throws \InvalidArgumentException
-     * @return \Zend\Log\Logger
+     * @param   string  $type
+     * @throws  \InvalidArgumentException
+     * @return  \Zend\Log\Logger
      */
     public function getLogger( $type )
     {
@@ -89,9 +70,10 @@ class LoggerManager
 
         if ( ! isset( $this->config[$type] ) )
         {
-            throw new InvalidArgumentException(
-                'Type (' . $type . ') not registered in config'
-            );
+            throw new Exception\InvalidArgumentException( sprintf(
+                'Type "%s" not registered in config',
+                $type
+            ) );
         }
 
         $logger = new Logger();
@@ -127,14 +109,7 @@ class LoggerManager
                     }
                 }
 
-                if ( is_string( $name ) )
-                {
-                    $writer = $logger->writerPlugin( $name, $options );
-                }
-                else
-                {
-                    $writer = $name;
-                }
+                $writer = $logger->writerPlugin( $name, $options );
 
                 if ( $writer instanceof WriterInterface )
                 {
@@ -205,8 +180,8 @@ class LoggerManager
     }
 
     /**
-     * @param string $type
-     * @return boolean
+     * @param   string  $type
+     * @return  boolean
      */
     public function hasLogger( $type )
     {
