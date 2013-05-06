@@ -14,19 +14,21 @@ use Zend\I18n\Exception;
 class Locale
 {
 
+    const DEFAULT_LOCALE = 'en';
+
     /**
      * Default locale
      *
      * @var string
      */
-    protected $default = 'en';
+    protected $default = self::DEFAULT_LOCALE;
 
     /**
      * Fallback locale (for translator)
      *
      * @var string
      */
-    protected $fallback = 'en';
+    protected $fallback = self::DEFAULT_LOCALE;
 
     /**
      * Available locales
@@ -38,7 +40,7 @@ class Locale
     /**
      * Get default locale
      *
-     * @return string
+     * @return  string
      */
     public function getDefault()
     {
@@ -48,8 +50,8 @@ class Locale
     /**
      * Set default locale
      *
-     * @param string $locale
-     * @return \Core\Service\Locale
+     * @param   string  $locale
+     * @return  Locale
      */
     public function setDefault( $locale )
     {
@@ -60,7 +62,7 @@ class Locale
     /**
      * Get fallback locale (for translator)
      *
-     * @return string
+     * @return  string
      */
     public function getFallback()
     {
@@ -70,8 +72,8 @@ class Locale
     /**
      * Set fallback locale (for translator)
      *
-     * @param string $locale
-     * @return \Core\Service\Locale
+     * @param   string  $locale
+     * @return  Locale
      */
     public function setFallback( $locale )
     {
@@ -82,14 +84,12 @@ class Locale
     /**
      * Get available locales
      *
-     * @return array
+     * @return  array
      */
     public function getAvailableLocales( $group = false )
     {
         $avail = array_keys( array_filter(
-            empty( $this->available )
-                ? array( $this->default => true )
-                : $this->available
+            empty( $this->available ) ? array( $this->default => true ) : $this->available
         ) );
 
         if ( $group )
@@ -110,7 +110,7 @@ class Locale
     /**
      * Get available flags of locales
      *
-     * @return array
+     * @return  array
      */
     public function getAvailableFlags()
     {
@@ -120,12 +120,17 @@ class Locale
     /**
      * Get available locales
      *
-     * @param array $locales
-     * @return \Core\Service\Locale
+     * @param   array   $locales
+     * @return  Locale
      */
     public function setAvailable( $locales )
     {
         $this->available = array();
+
+        if ( null === $locales || is_scalar( $locales ) )
+        {
+            $locales = (array) $locales;
+        }
 
         foreach ( $locales as $locale => $enabled )
         {
@@ -143,26 +148,35 @@ class Locale
             $this->available[$this->default] = true;
         }
 
+        ksort( $this->available );
+
         return $this;
     }
 
     /**
      * Normalize locale
      *
-     * @param string $locale
-     * @return string
+     * @param   string  $locale
+     * @return  string
      */
     public static function normalizeLocale( $locale )
     {
-        $parsed = IntlLocale::parseLocale( $locale );
-
-        if ( empty( $parsed ) ||
-             empty( $parsed['language'] ) )
+        if ( empty( $locale ) )
         {
             return '';
         }
 
-        $result = $parsed['language'];
+        $parsed = IntlLocale::parseLocale( $locale );
+
+        // @codeCoverageIgnoreStart
+        if ( empty( $parsed ) ||
+             empty( $parsed['language'] ) )
+        {
+            return $locale;
+        }
+        // @codeCoverageIgnoreEnd
+
+        $result = strtolower( $parsed['language'] );
 
         if ( ! empty( $parsed['region'] ) )
         {
@@ -175,7 +189,7 @@ class Locale
     /**
      * Get current locale
      *
-     * @return string
+     * @return  string
      */
     public function getCurrent()
     {
@@ -185,8 +199,8 @@ class Locale
     /**
      * Set current locale
      *
-     * @param string $locale
-     * @return \Core\Service\Locale
+     * @param   string  $locale
+     * @return  Locale
      */
     public function setCurrent( $locale )
     {
@@ -205,7 +219,7 @@ class Locale
     /**
      * Convert to string
      *
-     * @return string
+     * @return  string
      */
     public function __toString()
     {
@@ -213,22 +227,36 @@ class Locale
     }
 
     /**
+     * Preg-quote a locale
+     *
+     * @param   string  $locale
+     * @param   string  $delimiter
+     * @return  string
+     */
+    protected static function pregQuote( $locale, $delimiter )
+    {
+        return str_replace(
+            array( '-', '_' ),
+            '[_-]',
+            preg_quote( $locale, $delimiter )
+        );
+    }
+
+    /**
      * Get the most suitable locale from HTTP Accept-Language header
      *
-     * @param string $header
-     * @param array $available
-     * @return string
+     * @param   string  $header
+     * @param   array   $available
+     * @return  string
      */
     public function acceptFromHttp( $header, array $available = null )
     {
-        $normalized = null;
-
         if ( empty( $available ) )
         {
             $available = $this->getAvailableLocales();
         }
 
-        while ( $header && ! $normalized )
+        while ( ! empty( $header ) )
         {
             $locale = IntlLocale::acceptFromHttp( $header );
 
@@ -249,21 +277,22 @@ class Locale
                 }
 
                 $header = preg_replace(
-                    '/\s*(' . preg_quote( $locale, '/' ) . '|'
-                            . preg_quote( $primary, '/' ) . ')'
-                            . '\s*(;\s*q\s*=[^,]+\s*)?\s*,?\s*/',
-                    '', $header
+                    array(
+                        '/\s+/',
+                        '/(^|,)(' . static::pregQuote( $locale, '/' ) . '|'
+                            . static::pregQuote( $primary, '/' ) . '|\*)'
+                            . '(;q=[^,]+)?(,|$)/i'
+                    ),
+                    array( '', '$1' ),
+                    $header
                 );
-
-                if ( preg_match( '/^\s*\*\s*(;\s*q\s*=[^,]+\s*)?$/', $header ) )
-                {
-                    $header = '';
-                }
             }
+            // @codeCoverageIgnoreStart
             else
             {
-                $normalized = null;
+                break;
             }
+            // @codeCoverageIgnoreEnd
         }
 
         return $this->getDefault();
@@ -272,8 +301,8 @@ class Locale
     /**
      * Factory method
      *
-     * @param array|\Traversable $options
-     * @throws \InvalidArgumentException
+     * @param   array|\Traversable  $options
+     * @throws  \InvalidArgumentException
      */
     public static function factory( $options )
     {
@@ -285,15 +314,12 @@ class Locale
         {
             throw new Exception\InvalidArgumentException( sprintf(
                 '%s expects an array or Traversable object; received "%s"',
-                __METHOD__, (
-                    is_object( $options )
-                        ? get_class( $options )
-                        : gettype( $options )
-                )
+                __METHOD__,
+                is_object( $options ) ? get_class( $options ) : gettype( $options )
             ) );
         }
 
-        $locale = new static();
+        $locale = new static;
 
         if ( isset( $options['default'] ) )
         {
