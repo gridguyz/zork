@@ -2,6 +2,7 @@
 
 namespace Zork\I18n\Timezone;
 
+use Zend\I18n\Exception;
 use Zend\Stdlib\ArrayUtils;
 
 /**
@@ -71,11 +72,8 @@ class Timezone
         {
             throw new Exception\InvalidArgumentException( sprintf(
                 '%s expects an array or Traversable object; received "%s"',
-                __METHOD__, (
-                    is_object( $options )
-                        ? get_class( $options )
-                        : gettype( $options )
-                )
+                __METHOD__,
+                is_object( $options ) ? get_class( $options ) : gettype( $options )
             ) );
         }
 
