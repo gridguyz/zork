@@ -92,7 +92,8 @@ class LoggerManager
                 $options    = isset( $config['options'] )   ? (array)   $config['options']  : null;
                 $priority   = isset( $config['priority'] )  ? (int)     $config['priority'] : null;
 
-                if ( strtolower( $name ) == 'mail' && $this->serviceLocator !== null )
+                if ( $this->serviceLocator !== null &&
+                     in_array( strtolower( $name ), array( 'mail', 'zend\log\writer\mail' ) ) )
                 {
                     if ( ! isset( $options['transport'] ) )
                     {
@@ -101,12 +102,14 @@ class LoggerManager
                                                      ->getTransport();
                     }
 
-                    if ( isset( $options['mail'] ) && is_array( $options['mail'] ) )
+                    if ( ! isset( $options['mail'] ) )
                     {
-                        $options['mail'] = $this->serviceLocator
-                                                ->get( 'Zork\Mail\Service' )
-                                                ->createMessage( $options['mail'] );
+                        $options['mail'] = array();
                     }
+
+                    $options['mail'] = $this->serviceLocator
+                                            ->get( 'Zork\Mail\Service' )
+                                            ->createMessage( $options['mail'] );
                 }
 
                 $writer = $logger->writerPlugin( $name, $options );
@@ -124,37 +127,23 @@ class LoggerManager
                                             ? (array) $filterConfig['options']
                                             : null;
 
-                            if ( is_string( $filterName ) )
-                            {
-                                $filter = $writer->filterPlugin(
-                                    $filterName,
-                                    $filterOptions
-                                );
-                            }
-                            else
-                            {
-                                $filter = $filterName;
-                            }
+                            $filter = $writer->filterPlugin(
+                                $filterName,
+                                $filterOptions
+                            );
 
                             $writer->addFilter( $filter, $filterOptions );
                         }
                     }
 
-                    if ( isset( $config['formatter'] ) )
+                    if ( isset( $config['formatter']['name'] ) )
                     {
-                        if ( isset( $config['formatter']['name'] ) )
-                        {
-                            $formatter = $writer->formatterPlugin(
-                                $config['formatter']['name'],
-                                isset( $config['formatter']['options'] )
-                                    ? $config['formatter']['options']
-                                    : array()
-                            );
-                        }
-                        else
-                        {
-                            $formatter = $config['formatter'];
-                        }
+                        $formatter = $writer->formatterPlugin(
+                            $config['formatter']['name'],
+                            isset( $config['formatter']['options'] )
+                                ? $config['formatter']['options']
+                                : array()
+                        );
 
                         $writer->setFormatter( $formatter );
                     }

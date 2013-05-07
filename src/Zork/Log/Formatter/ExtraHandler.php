@@ -28,7 +28,9 @@ class ExtraHandler extends Simple
     {
         if ( ! empty( $event['extra'] ) )
         {
-            $event['extra'] = Debug::dump( $event['extra'], 'Extra', false );
+            $event['extra'] = array(
+                Debug::dump( $event['extra'], 'Extra', false )
+            );
         }
 
         return parent::format( $event );

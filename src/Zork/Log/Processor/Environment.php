@@ -8,6 +8,7 @@ use Zend\Log\Processor\ProcessorInterface;
  * Environment
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
+ * @codeCoverageIgnore
  */
 class Environment implements ProcessorInterface
 {
@@ -27,8 +28,6 @@ class Environment implements ProcessorInterface
 
         $event['extra']['server']  = $_SERVER;
         $event['extra']['request'] = $_REQUEST;
-
-        // @codeCoverageIgnoreStart
 
         switch ( true )
         {
@@ -71,8 +70,6 @@ class Environment implements ProcessorInterface
         {
             $event['extra']['xml'] = @ file_get_contents( 'php://input' );
         }
-
-        // @codeCoverageIgnoreEnd
 
         return $event;
     }
