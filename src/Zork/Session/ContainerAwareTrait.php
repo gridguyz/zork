@@ -35,7 +35,12 @@ trait ContainerAwareTrait
      */
     public function setSessionManager( ManagerInterface $manager )
     {
-        $this->sessionManager = $manager;
+        if ( $this->sessionManager !== $manager )
+        {
+            $this->sessionManager    = $manager;
+            $this->sessionContainers = array();
+        }
+
         return $this;
     }
 

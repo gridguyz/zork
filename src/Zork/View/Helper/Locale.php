@@ -140,12 +140,6 @@ class Locale extends AbstractHelper
     public function toIso()
     {
         $locale = IntlLocale::parseLocale( $this->getCurrent() );
-
-        if ( empty( $locale ) || empty( $locale['language'] ) )
-        {
-            return null;
-        }
-
         $result = $locale['language'];
 
         if ( ! empty( $locale['region'] ) )
