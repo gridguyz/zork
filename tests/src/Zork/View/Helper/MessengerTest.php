@@ -11,6 +11,7 @@ use Zork\Test\PHPUnit\View\Helper\TestCase;
  * MessengerTest
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
+ * @covers Zork\View\Helper\Messenger
  */
 class MessengerTest extends TestCase
 {

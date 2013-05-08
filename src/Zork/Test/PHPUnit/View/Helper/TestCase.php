@@ -15,6 +15,11 @@ abstract class TestCase extends \Zork\Test\PHPUnit\TestCase
 
     /**
      * @var string
+     */
+    protected static $rendererClass = 'Zend\View\Renderer\RendererInterface';
+
+    /**
+     * @var string
      * @abstract
      */
     protected static $helperClass = '';
@@ -24,6 +29,11 @@ abstract class TestCase extends \Zork\Test\PHPUnit\TestCase
      * @abstract
      */
     protected static $helperCtorArgs = array();
+
+    /**
+     * @var array
+     */
+    protected static $pluginAliases = array();
 
     /**
      * @var \Zend\View\Renderer\RendererInterface
@@ -39,27 +49,55 @@ abstract class TestCase extends \Zork\Test\PHPUnit\TestCase
      * Create helper
      *
      * @param   array|null  $ctorArgs
-     * @param   string|null $class
+     * @param   string|null $className
      * @return  \Zend\View\Helper\HelperInterface
      */
-    protected function createHelper( $ctorArgs = null, $class = null )
+    protected function createHelper( array $ctorArgs = null, $className = null )
     {
         if ( null === $ctorArgs )
         {
             $ctorArgs = static::$helperCtorArgs;
         }
 
-        if ( null === $class )
+        if ( null === $className )
         {
-            $class = static::$helperClass;
+            $className = static::$helperClass;
         }
 
-        $rClass = new ReflectionClass( $class );
-        $helper = $rClass->getConstructor()
-                ? $rClass->newInstanceArgs( $ctorArgs )
-                : $rClass->newInstance();
-        $helper->setView( $this->viewMock );
-        return $helper;
+        $class  = new ReflectionClass( $className );
+        $helper = $class->getConstructor()
+                ? $class->newInstanceArgs( $ctorArgs )
+                : $class->newInstance();
+        return $helper->setView( $this->viewMock );
+    }
+
+    /**
+     * Create plugin
+     *
+     * @param   string  $name
+     * @param   array   $options
+     * @return  \Zend\View\Helper\HelperInterface
+     */
+    public function plugin( $name, array $options = null )
+    {
+        $lname = strtolower( $name );
+
+        if ( ! empty( static::$pluginAliases[$lname] ) )
+        {
+            $name = static::$pluginAliases[$lname];
+        }
+
+        if ( ! class_exists( $name ) )
+        {
+            $name = 'Zend\\View\\Helper\\' . ucfirst( $name ) ;
+        }
+
+        if ( ! class_exists( $name ) )
+        {
+            return null;
+        }
+
+        return $this->createHelper( $options, $name );
     }
 
     /**
@@ -80,8 +118,17 @@ abstract class TestCase extends \Zork\Test\PHPUnit\TestCase
             ) );
         }
 
-        $this->viewMock = $this->getMock( 'Zend\View\Renderer\RendererInterface' );
-        $this->helper   = $this->createHelper();
+        $this->viewMock = $this->getMock( static::$rendererClass );
+
+        if ( method_exists( $this->viewMock, 'plugin' ) )
+        {
+            $this->viewMock
+                 ->expects( $this->any() )
+                 ->method( 'plugin' )
+                 ->will( $this->returnCallback( array( $this, 'plugin' ) ) );
+        }
+
+        $this->helper = $this->createHelper();
     }
 
     /**

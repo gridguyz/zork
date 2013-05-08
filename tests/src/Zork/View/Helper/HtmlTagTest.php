@@ -8,6 +8,7 @@ use Zork\Test\PHPUnit\View\Helper\TestCase;
  * HtmlTagTest
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
+ * @covers Zork\View\Helper\HtmlTag
  */
 class HtmlTagTest extends TestCase
 {

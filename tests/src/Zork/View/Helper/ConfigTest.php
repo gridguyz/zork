@@ -8,6 +8,7 @@ use Zork\Test\PHPUnit\View\Helper\TestCase;
  * ConfigTest
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
+ * @covers Zork\View\Helper\Config
  */
 class ConfigTest extends TestCase
 {

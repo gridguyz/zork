@@ -9,6 +9,7 @@ use Zork\Test\PHPUnit\View\Helper\TestCase;
  * LocaleTest
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
+ * @covers Zork\View\Helper\Locale
  */
 class LocaleTest extends TestCase
 {

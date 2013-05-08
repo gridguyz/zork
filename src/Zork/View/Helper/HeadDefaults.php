@@ -73,6 +73,11 @@ class HeadDefaults extends AbstractHelper
             {
                 $plugin = $view->plugin( $helper );
 
+                if ( ! is_array( $data ) )
+                {
+                    $data = (array) $data;
+                }
+
                 switch ( strtolower( $helper ) )
                 {
                     case 'headtitle':
@@ -99,11 +104,11 @@ class HeadDefaults extends AbstractHelper
 
                         foreach ( $data as $key => $value )
                         {
-                            $method = array( $plugin, 'set' . ucfirst( $key ) );
+                            $method = 'set' . ucfirst( $key );
 
-                            if ( is_callable( $method ) )
+                            if ( method_exists( $plugin, $method ) )
                             {
-                                $method( $value );
+                                $plugin->$method( $value );
                             }
                             else
                             {
@@ -259,12 +264,15 @@ class HeadDefaults extends AbstractHelper
 
                     default:
 
-                        foreach ( array_reverse( $data ) as $spec )
+                        if ( is_callable( $plugin ) )
                         {
-                            $plugin(
-                                (array) $spec,
-                                AbstractContainer::PREPEND
-                            );
+                            foreach ( array_reverse( $data ) as $spec )
+                            {
+                                $plugin(
+                                    (array) $spec,
+                                    AbstractContainer::PREPEND
+                                );
+                            }
                         }
 
                         break;
@@ -280,6 +288,7 @@ class HeadDefaults extends AbstractHelper
      *
      * @param array|\Traversable $options
      * @throws \InvalidArgumentException
+     * @codeCoverageIgnore
      */
     public static function factory( $options )
     {

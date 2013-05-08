@@ -9,6 +9,7 @@ use Zork\Test\PHPUnit\View\Helper\TestCase;
  * DomainTest
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
+ * @covers Zork\View\Helper\Domain
  */
 class DomainTest extends TestCase
 {
