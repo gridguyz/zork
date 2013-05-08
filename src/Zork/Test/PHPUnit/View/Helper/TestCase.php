@@ -54,8 +54,10 @@ abstract class TestCase extends \Zork\Test\PHPUnit\TestCase
             $class = static::$helperClass;
         }
 
-        $rClass  = new ReflectionClass( $class );
-        $helper = $rClass->newInstanceArgs( $ctorArgs );
+        $rClass = new ReflectionClass( $class );
+        $helper = $rClass->getConstructor()
+                ? $rClass->newInstanceArgs( $ctorArgs )
+                : $rClass->newInstance();
         $helper->setView( $this->viewMock );
         return $helper;
     }
