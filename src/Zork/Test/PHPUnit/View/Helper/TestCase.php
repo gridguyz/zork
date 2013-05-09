@@ -36,6 +36,11 @@ abstract class TestCase extends \Zork\Test\PHPUnit\TestCase
     protected static $pluginAliases = array();
 
     /**
+     * @var array
+     */
+    protected $pluginInstances = array();
+
+    /**
      * @var \Zend\View\Renderer\RendererInterface
      */
     protected $viewMock;
@@ -87,6 +92,11 @@ abstract class TestCase extends \Zork\Test\PHPUnit\TestCase
             $name = static::$pluginAliases[$lname];
         }
 
+        if ( isset( $this->pluginInstances[$lname] ) )
+        {
+            return $this->pluginInstances[$lname];
+        }
+
         if ( ! class_exists( $name ) )
         {
             $name = 'Zend\\View\\Helper\\' . ucfirst( $name ) ;
@@ -128,7 +138,8 @@ abstract class TestCase extends \Zork\Test\PHPUnit\TestCase
                  ->will( $this->returnCallback( array( $this, 'plugin' ) ) );
         }
 
-        $this->helper = $this->createHelper();
+        $this->helper           = $this->createHelper();
+        $this->pluginInstances  = array();
     }
 
     /**
@@ -139,8 +150,9 @@ abstract class TestCase extends \Zork\Test\PHPUnit\TestCase
     {
         parent::tearDown();
 
-        $this->helper   = null;
-        $this->viewMock = null;
+        $this->helper           = null;
+        $this->viewMock         = null;
+        $this->pluginInstances  = array();
     }
 
     /**
