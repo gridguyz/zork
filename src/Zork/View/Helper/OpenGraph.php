@@ -2,8 +2,11 @@
 
 namespace Zork\View\Helper;
 
+use Countable;
 use Traversable;
 use ArrayAccess;
+use ArrayIterator;
+use IteratorAggregate;
 use Zend\View\Helper\HeadMeta;
 use Zend\View\Helper\HeadLink;
 use Zend\View\Helper\AbstractHelper;
@@ -14,7 +17,9 @@ use Zend\View\Helper\AbstractHelper;
  * @author David Pozsar <david.pozsar@megaweb.hu>
  */
 class OpenGraph extends AbstractHelper
-             implements ArrayAccess
+             implements Countable,
+                        ArrayAccess,
+                        IteratorAggregate
 {
 
     /**
@@ -194,6 +199,9 @@ class OpenGraph extends AbstractHelper
      * Retrieve the HeadLink helper
      *
      * @return \Zend\View\Helper\HeadLink
+     * @codeCoverageIgnore
+     * @deprecated
+     * @ignore
      */
     protected function getHeadLinkHelper()
     {
@@ -220,6 +228,9 @@ class OpenGraph extends AbstractHelper
      * Retrieve the HeadTitle helper
      *
      * @return \Zork\View\Helper\HeadTitle
+     * @codeCoverageIgnore
+     * @deprecated
+     * @ignore
      */
     protected function getHeadTitleHelper()
     {
@@ -248,7 +259,7 @@ class OpenGraph extends AbstractHelper
      * @param   array|string    $set
      * @return  string|\Zork\View\Helper\HtmlTag
      */
-    public function __invoke( $set = null  )
+    public function __invoke( $set = null )
     {
         if ( null !== $set )
         {
@@ -364,6 +375,46 @@ class OpenGraph extends AbstractHelper
     }
 
     /**
+     * Retrieve an external iterator
+     * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
+     *
+     * @return  Traversable
+     */
+    public function getIterator()
+    {
+        return new ArrayIterator( $this->properties );
+    }
+
+    /**
+     * Count elements of an object
+     * @link http://php.net/manual/en/countable.count.php
+     *
+     * @return  int
+     */
+    public function count()
+    {
+        return count( $this->properties );
+    }
+
+    /**
+     * Get type
+     *
+     * @return \Zork\View\Helper\OpenGraph
+     */
+    public function getType()
+    {
+        if ( ! isset( $this['type'] ) )
+        {
+            $this['type'] = array(
+                'property'  => 'og:type',
+                'content'   => self::TYPE_WEBSITE,
+            );
+        }
+
+        return $this['type']['content'];
+    }
+
+    /**
      * Set OpenGraph object-type
      *
      * @param   string  $type
@@ -392,7 +443,68 @@ class OpenGraph extends AbstractHelper
     }
 
     /**
-     * Set prefixes
+     * Get prefix namespace
+     *
+     * @param   string  $prefix
+     * @return  string|null
+     */
+    public function getPrefixNs( $prefix )
+    {
+        if ( empty( $this->prefixes[$prefix] ) )
+        {
+            return null;
+        }
+
+        return $this->prefixes[$prefix];
+    }
+
+    /**
+     * Get prefixes by namespace
+     *
+     * @param   string  $prefixNs
+     * @param   bool    $onlyFirst
+     * @return  array|string|null
+     */
+    public function getPrefixByNs( $prefixNs, $onlyFirst = false )
+    {
+        $prefixes = array();
+
+        foreach ( $this->prefixes as $prefix => $ns )
+        {
+            if ( $ns == $prefixNs )
+            {
+                if ( $onlyFirst )
+                {
+                    return $prefix;
+                }
+
+                $prefixes[] = $prefix;
+            }
+        }
+
+        if ( $onlyFirst )
+        {
+            return null;
+        }
+
+        return $prefixes;
+    }
+
+    /**
+     * Add a prefix
+     *
+     * @param   string  $prefix
+     * @param   string  $ns
+     * @return  \Zork\View\Helper\OpenGraph
+     */
+    public function addPrefix( $prefix, $ns )
+    {
+        $this->prefixes[$prefix] = (string) $ns;
+        return $this;
+    }
+
+    /**
+     * Add prefixes
      *
      * @param   array|\Traversable  $prefixes
      * @return  \Zork\View\Helper\OpenGraph
@@ -403,8 +515,24 @@ class OpenGraph extends AbstractHelper
         {
             foreach ( $prefixes as $prefix => $ns )
             {
-                $this->prefixes[$prefix] = (string) $ns;
+                $this->addPrefix( $prefix, $ns );
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Remove prefix
+     *
+     * @param   string  $prefix
+     * @return  \Zork\View\Helper\OpenGraph
+     */
+    public function removePrefix( $prefix )
+    {
+        if ( isset( $this->prefixes[$prefix] ) )
+        {
+            unset( $this->prefixes[$prefix] );
         }
 
         return $this;
