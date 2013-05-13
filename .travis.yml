@@ -11,9 +11,9 @@ matrix:
 before_install:
   - composer self-update
 
-install: composer install --no-dev
+install: composer install --dev
 
-script: phpunit -c tests/phpunit.xml
+script: vendor/bin/phpunit -c tests/phpunit.xml
 
 notifications:
   email: dev@megaweb.hu

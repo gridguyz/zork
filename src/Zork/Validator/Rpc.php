@@ -225,12 +225,14 @@ class Rpc extends AbstractValidator
         }
         catch ( BadMethodCallException $ex )
         {
-            $this->error( self::NOT_VALID_METHOD, $ex->getMessage() );
+            $this->abstractOptions['messages']['exceptionMessage'] = $ex->getMessage();
+            $this->error( self::NOT_VALID_METHOD );
             return false;
         }
         catch ( \Exception $ex )
         {
-            $this->error( self::EXCEPTION, $ex->getMessage() );
+            $this->abstractOptions['messages']['exceptionMessage'] = $ex->getMessage();
+            $this->error( self::EXCEPTION );
             return false;
         }
 
@@ -292,21 +294,26 @@ class Rpc extends AbstractValidator
             $message = null;
         }
 
-        if ( $result === null )
+        if ( ! $success && $message )
         {
-            $this->error( self::RETURN_NULL, $message );
+            $this->abstractOptions['messages']['customMessage'] = $message;
+        }
+
+        if ( $success === null )
+        {
+            $this->error( self::RETURN_NULL );
             return false;
         }
 
-        if ( $result === false )
+        if ( $success === false )
         {
-            $this->error( self::RETURN_FALSE, $message );
+            $this->error( self::RETURN_FALSE );
             return false;
         }
 
-        if ( empty( $result ) )
+        if ( empty( $success ) )
         {
-            $this->error( self::RETURN_EMPTY, $message );
+            $this->error( self::RETURN_EMPTY );
             return false;
         }
 
