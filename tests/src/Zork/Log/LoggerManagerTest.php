@@ -90,6 +90,11 @@ class LoggerManagerTest extends TestCase
     );
 
     /**
+     * @var ServiceManager
+     */
+    protected $serviceManager;
+
+    /**
      * @var int
      */
     protected static $sent = 0;

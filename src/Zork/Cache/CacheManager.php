@@ -4,8 +4,6 @@ namespace Zork\Cache;
 
 use Traversable;
 use Zend\Stdlib\ArrayUtils;
-use Zend\Cache\StorageFactory;
-use Zend\Cache\PatternFactory;
 
 /**
  * CacheManager
@@ -139,18 +137,11 @@ class CacheManager
      */
     public function createStorage( $namespace = self::DEFAULT_NAMESPACE )
     {
-        $options = array() + $this->getStorageOptions();
-
-        if ( ! empty( $options['namespace'] ) )
-        {
-            $options['namespace'] = $options['namespace'] . $namespace;
-        }
-        else
-        {
-            $options['namespace'] = $namespace;
-        }
-
-        return StorageFactory::factory( $options );
+        $options = $this->getStorageOptions();
+        $options['namespace'] = empty( $options['namespace'] ) ? $namespace : $options['namespace'] . $namespace;
+        $factory = empty( $options['factory'] ) ? 'Zend\Cache\StorageFactory' : $options['factory'];
+        unset( $options['factory'] );
+        return $factory::factory( $options );
     }
 
     /**
@@ -174,17 +165,18 @@ class CacheManager
     public function createPattern( $name )
     {
         $options = $this->getPatternOptions();
+        $options = isset( $options[$name] ) ? $options[$name] : array();
+        $factory = empty( $options['factory'] ) ? 'Zend\Cache\PatternFactory' : $options['factory'];
+        unset( $options['factory'] );
 
-        if ( isset( $options[$name] ) )
+        if ( empty( $options['storage'] ) && ! empty( $this->storageOptions ) )
         {
-            $options = $options[$name];
-        }
-        else
-        {
-            $options = array();
+            $options['storage'] = $this->getStorage(
+                'Zend\\Cache\\Pattern\\' . ucfirst( $name )
+            );
         }
 
-        return PatternFactory::factory( $name, $options );
+        return $factory::factory( $name, $options );
     }
 
     /**

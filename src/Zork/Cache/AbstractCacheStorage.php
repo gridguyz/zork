@@ -9,7 +9,7 @@ use Zend\Cache\Storage\StorageInterface;
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
  */
-class AbstractCacheStorage
+abstract class AbstractCacheStorage
 {
 
     /**
@@ -27,7 +27,7 @@ class AbstractCacheStorage
 
     /**
      * @param \Zend\Cache\Storage\StorageInterface $cacheAdapter
-     * @return \Zork\Cache\AbstractCache
+     * @return \Zork\Cache\AbstractCacheStorage
      */
     public function setCacheStorage( StorageInterface $cacheAdapter )
     {
@@ -42,9 +42,7 @@ class AbstractCacheStorage
     public function __construct( CacheManager $cacheManager, $namespace = null )
     {
         $this->setCacheStorage(
-            $cacheManager->createStorage(
-                $namespace ?: get_called_class()
-            )
+            $cacheManager->createStorage( $namespace ?: get_called_class() )
         );
     }
 
