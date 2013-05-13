@@ -42,8 +42,6 @@
         "ext-fileinfo": "*",
         "ext-mbstring": "*",
         "ext-openssl": "*",
-        "zendframework/zendoauth": "2.*",
-        "zendframework/zendopenid": "2.*",
         "zendframework/zendframework": "2.1.*"
     },
     "require-dev": {
