@@ -77,7 +77,7 @@ class TimezoneTest extends TestCase
      */
     public function testFactoryMethod()
     {
-        $zone = Timezone::Factory( new ArrayIterator( array(
+        $zone = Timezone::factory( new ArrayIterator( array(
             'id'    => 'Europe/London',
         ) ) );
 
@@ -94,7 +94,7 @@ class TimezoneTest extends TestCase
      */
     public function testFactoryMethodNonTraversable()
     {
-        Timezone::Factory( 0 );
+        Timezone::factory( 0 );
     }
 
 }

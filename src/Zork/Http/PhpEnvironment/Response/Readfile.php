@@ -18,36 +18,38 @@ class Readfile extends Response
     /**
      * File to read
      *
-     * @var string
+     * @var     string
      */
     protected $file;
 
     /**
      * Unlink file after read it?
      *
-     * @var bool
+     * @var     bool
      */
     protected $unlink = false;
 
     /**
      * Constructor
      *
-     * @param string $file
+     * @param   string  $file
+     * @param   bool    $unlink
      */
-    public function __construct( $file )
+    public function __construct( $file, $unlink = false )
     {
         $this->file = $file;
+        $this->setUnlink( $unlink );
     }
 
     /**
      * Populate object from file
      *
-     * @param  string       $file
-     * @param  string       $mime
-     * @param  bool|string  $attachment
-     * @param  bool         $unlink
-     * @return \Zork\Http\PhpEnvironment\Response\Readfile
-     * @throws \Zend\Http\Exception\InvalidArgumentException
+     * @param   string      $file
+     * @param   string      $mime
+     * @param   bool|string $attachment
+     * @param   bool        $unlink
+     * @return  \Zork\Http\PhpEnvironment\Response\Readfile
+     * @throws  \Zend\Http\Exception\InvalidArgumentException
      */
     public static function fromFile( $file, $mime = null, $attachment = false, $unlink = false )
     {
@@ -58,14 +60,7 @@ class Readfile extends Response
             );
         }
 
-        $readfile = new static( $file );
-
-        if ( null === $mime &&
-             function_exists( 'mime_content_type' ) &&
-             ini_get( 'mime_magic.magicfile' ) )
-        {
-            $mime = mime_content_type( $file );
-        }
+        $readfile = new static( $file, $unlink );
 
         if ( null === $mime &&
              class_exists( 'finfo', false ) )
@@ -97,6 +92,8 @@ class Readfile extends Response
 
             $filename = basename( $attachment );
 
+            // @codeCoverageIgnoreStart
+
             if ( function_exists( 'iconv' ) )
             {
                 $filename = @ iconv( 'UTF-8', 'ASCII//TRANSLIT', $filename );
@@ -105,6 +102,8 @@ class Readfile extends Response
             {
                 $filename = @ mb_convert_encoding( $filename, 'ASCII', 'auto' );
             }
+
+            // @codeCoverageIgnoreEnd
 
             if ( ! empty( $filename ) )
             {
@@ -116,13 +115,13 @@ class Readfile extends Response
             }
         }
 
-        return $readfile->setUnlink( $unlink );
+        return $readfile;
     }
 
     /**
      * Set unlink file
      *
-     * @return bool
+     * @return  bool
      */
     public function getUnlink()
     {
@@ -132,8 +131,8 @@ class Readfile extends Response
     /**
      * Set unlink file
      *
-     * @param  bool $value
-     * @return Readfile
+     * @param   bool    $value
+     * @return  Readfile
      */
     public function setUnlink( $value )
     {
@@ -144,8 +143,8 @@ class Readfile extends Response
     /**
      * Set message content
      *
-     * @param  mixed $value
-     * @return Readfile
+     * @param   mixed   $value
+     * @return  Readfile
      */
     public function setContent( $value )
     {
@@ -157,7 +156,7 @@ class Readfile extends Response
     /**
      * Get message content
      *
-     * @return mixed
+     * @return  mixed
      */
     public function getContent()
     {
@@ -167,7 +166,7 @@ class Readfile extends Response
     /**
      * Send content
      *
-     * @return Response
+     * @return  Response
      */
     public function sendContent()
     {

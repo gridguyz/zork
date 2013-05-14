@@ -51,14 +51,12 @@ class FileData extends Response
                      ->addHeaderLine( 'Content-Type', $mime );
         }
 
-        if ( $attachment && is_string( $attachment ) )
+        if ( $attachment )
         {
-            if ( ! is_string( $attachment ) )
-            {
-                $attachment = (string) $attachment;
-            }
+            $attachment = (string) $attachment;
+            $filename   = basename( $attachment );
 
-            $filename = basename( $attachment );
+            // @codeCoverageIgnoreStart
 
             if ( function_exists( 'iconv' ) )
             {
@@ -68,6 +66,8 @@ class FileData extends Response
             {
                 $filename = @ mb_convert_encoding( $filename, 'ASCII', 'auto' );
             }
+
+            // @codeCoverageIgnoreEnd
 
             if ( ! empty( $filename ) )
             {
