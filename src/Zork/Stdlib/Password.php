@@ -4,6 +4,8 @@ namespace Zork\Stdlib;
 
 use Zend\Math\Rand;
 
+// @codeCoverageIgnoreStart
+
 if ( ! defined( 'PASSWORD_BCRYPT' ) )
 {
     define( 'PASSWORD_BCRYPT', 1 );
@@ -13,6 +15,8 @@ if ( ! defined( 'PASSWORD_DEFAULT' ) )
 {
     define( 'PASSWORD_DEFAULT', PASSWORD_BCRYPT );
 }
+
+// @codeCoverageIgnoreEnd
 
 /**
  * Password
@@ -88,10 +92,14 @@ class Password
             $algo = self::ALGO_DEFAULT;
         }
 
+        // @codeCoverageIgnoreStart
+
         if ( function_exists( 'password_hash' ) )
         {
             return password_hash( $password, $algo, $options );
         }
+
+        // @codeCoverageIgnoreEnd
 
         if ( empty( $options['salt'] ) )
         {
@@ -103,6 +111,7 @@ class Password
             case self::ALGO_BCRYPT:
 
                 // @codeCoverageIgnoreStart
+
                 if ( ! defined( 'CRYPT_BLOWFISH' ) )
                 {
                     throw new \RuntimeException( sprintf(
@@ -110,6 +119,7 @@ class Password
                         __METHOD__
                     ) );
                 }
+
                 // @codeCoverageIgnoreEnd
 
                 $cost = isset( $options['cost'] ) ? min( 31, max( 4, (int) $options['cost'] ) ) : 7;
@@ -118,6 +128,8 @@ class Password
 
                 break;
 
+            // @codeCoverageIgnoreStart
+
             default:
 
                 throw new \InvalidArgumentException( sprintf(
@@ -125,6 +137,8 @@ class Password
                     __METHOD__,
                     $algo
                 ) );
+
+            // @codeCoverageIgnoreEnd
         }
 
         return crypt( $password, $salt );
@@ -139,10 +153,14 @@ class Password
      */
     public static function verify( $password, $hash )
     {
+        // @codeCoverageIgnoreStart
+
         if ( function_exists( 'password_verify' ) )
         {
             return password_verify( $password, $hash );
         }
+
+        // @codeCoverageIgnoreEnd
 
         return crypt( $password, $hash ) == $hash;
     }
@@ -165,10 +183,14 @@ class Password
             $algo = self::ALGO_DEFAULT;
         }
 
+        // @codeCoverageIgnoreStart
+
         if ( function_exists( 'password_needs_rehash' ) )
         {
             return password_needs_rehash( $hash, $algo, $options );
         }
+
+        // @codeCoverageIgnoreEnd
 
         switch ( $algo )
         {
@@ -205,6 +227,8 @@ class Password
 
                 break;
 
+            // @codeCoverageIgnoreStart
+
             default:
 
                 throw new \InvalidArgumentException( sprintf(
@@ -212,6 +236,8 @@ class Password
                     __METHOD__,
                     $algo
                 ) );
+
+            // @codeCoverageIgnoreEnd
         }
 
         return false;
@@ -225,10 +251,14 @@ class Password
      */
     public static function getInfo( $hash )
     {
+        // @codeCoverageIgnoreStart
+
         if ( function_exists( 'password_get_info' ) )
         {
             return password_get_info( $hash );
         }
+
+        // @codeCoverageIgnoreEnd
 
         if ( in_array( substr( $hash, 0, 4 ), array( '$2a$', '$2x$', '$2y$' ) ) )
         {
@@ -242,6 +272,10 @@ class Password
             );
         }
 
+        // @codeCoverageIgnoreStart
+
         return null;
+
+        // @codeCoverageIgnoreEnd
     }
 }
