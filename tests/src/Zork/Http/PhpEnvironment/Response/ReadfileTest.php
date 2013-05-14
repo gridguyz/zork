@@ -8,7 +8,7 @@ use PHPUnit_Framework_TestCase as TestCase;
  * ReadfileTest
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
- * @covers Zork\Http\PhpEnvironment\Readfile
+ * @covers Zork\Http\PhpEnvironment\Response\Readfile
  */
 class ReadfileTest extends TestCase
 {
