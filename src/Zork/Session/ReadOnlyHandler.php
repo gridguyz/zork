@@ -8,6 +8,7 @@ use SessionHandler;
  * ReadOnlyHandler
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
+ * @codeCoverageIgnore
  */
 class ReadOnlyHandler extends SessionHandler
 {

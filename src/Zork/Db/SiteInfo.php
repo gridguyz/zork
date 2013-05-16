@@ -146,7 +146,8 @@ class SiteInfo
      */
     public function getIdn()
     {
-        return @ idn_to_utf8( $this->getDomain() );
+        $domain = $this->getDomain();
+        return $domain ? @ idn_to_utf8( $domain ) : '';
     }
 
     /**
@@ -176,7 +177,7 @@ class SiteInfo
      */
     public function getSubdomainId()
     {
-        return (int) $this->subdomainId;
+        return (int) $this->subdomainId ?: null;
     }
 
     /**
@@ -196,7 +197,8 @@ class SiteInfo
      */
     public function getFullIdn()
     {
-        return @ idn_to_utf8( $this->getFulldomain() );
+        $fulldomain = $this->getFulldomain();
+        return $fulldomain ? @ idn_to_utf8( $fulldomain ) : '';
     }
 
 }

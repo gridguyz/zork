@@ -3,7 +3,9 @@
          backupGlobals="false">
     <testsuites>
         <testsuite name="Zork">
-            <directory>./src/</directory>
+            <directory suffix="Test.php"
+                       phpVersion="5.4.0"
+                       phpVersionOperator=">=">./src/</directory>
         </testsuite>
     </testsuites>
     <filter>
