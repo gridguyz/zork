@@ -365,7 +365,7 @@ class PgsqlConnection extends Connection
         {
             throw new InvalidQueryException(
                 $exception->getMessage() . ':' .
-                PHP_EOL . $this->resource->queryString,
+                PHP_EOL . $sql,
                 $exception->getCode(),
                 $exception
             );
