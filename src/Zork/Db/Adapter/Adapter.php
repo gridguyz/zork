@@ -26,7 +26,10 @@ class Adapter extends ZendAdapter
              strtolower( $parameters['driver'] ) == 'pdo' &&
              strtolower( $parameters['pdodriver'] ) == 'pgsql' )
         {
-            return new Pdo( new Driver\Pdo\PgsqlConnection( $parameters ) );
+            return new Pdo(
+                new Driver\Pdo\PgsqlConnection( $parameters ),
+                new Driver\Pdo\Statement()
+            );
         }
 
         return parent::createDriver( $parameters );

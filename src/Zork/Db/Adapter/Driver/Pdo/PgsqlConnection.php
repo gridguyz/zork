@@ -3,6 +3,7 @@
 namespace Zork\Db\Adapter\Driver\Pdo;
 
 use Zend\Db\Adapter\Driver\Pdo\Connection;
+use Zend\Db\Adapter\Exception\InvalidQueryException;
 
 /**
  * PgsqlConnection
@@ -345,6 +346,30 @@ class PgsqlConnection extends Connection
         }
 
         return parent::rollBack();
+    }
+
+    /**
+     * Execute
+     *
+     * @param   string $sql
+     * @return  \Zend\Db\Adapter\Driver\Pdo\Result
+     * @throws  InvalidQueryException
+     */
+    public function execute( $sql )
+    {
+        try
+        {
+            return parent::execute( $sql );
+        }
+        catch ( InvalidQueryException $exception )
+        {
+            throw new InvalidQueryException(
+                $exception->getMessage() . ':' .
+                PHP_EOL . $this->resource->queryString,
+                $exception->getCode(),
+                $exception
+            );
+        }
     }
 
 }
