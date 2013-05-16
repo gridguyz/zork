@@ -154,12 +154,6 @@ abstract class AbstractAdminController extends AbstractActionController
                     $page['router'] = $router;
                 }
 
-                if ( isset( $page['route'] ) &&
-                     2 > count( explode( '/', $page['route'] ) ) )
-                {
-                    $page['route'] .= '/query';
-                }
-
                 $page = $page + array( 'params' => array() );
                 $page['params'] = $page['params'] + array( 'locale' => $locale );
             }
