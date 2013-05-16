@@ -5,8 +5,8 @@ namespace Zork\Stdlib;
 use ArrayAccess;
 use Traversable;
 use DateTimeZone;
+use DateTime as Base;
 use Zend\Stdlib\ArrayUtils;
-use Zend\Stdlib\DateTime as Base;
 
 /**
  * DateTime
@@ -69,8 +69,8 @@ class DateTime extends Base implements ArrayAccess
      */
     public static function __set_state( $array )
     {
-        $array = (array) $array;
-        return new static( $array['date'] . $array['timezone'] );
+        $date = parent::__set_state( $array );
+        return new static( '@' . $date->format( 'U' ) );
     }
 
     /**
