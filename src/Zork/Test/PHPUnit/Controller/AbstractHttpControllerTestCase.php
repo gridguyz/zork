@@ -2,6 +2,7 @@
 
 namespace Zork\Test\PHPUnit\Controller;
 
+use Zork\Test\PHPUnit\TestCaseTrait;
 use Zend\Test\PHPUnit\Controller\AbstractHttpControllerTestCase as BaseTestCase;
 
 /**
@@ -11,6 +12,8 @@ use Zend\Test\PHPUnit\Controller\AbstractHttpControllerTestCase as BaseTestCase;
  */
 class AbstractHttpControllerTestCase extends BaseTestCase
 {
+
+    use TestCaseTrait;
 
     /**
      * Application config path
@@ -26,6 +29,19 @@ class AbstractHttpControllerTestCase extends BaseTestCase
     {
         $this->setApplicationConfig( include $this->applicationConfigPath );
         parent::setUp();
+    }
+
+    /**
+     * Get a service by its name
+     *
+     * @param   string  $name
+     * @return  mixed
+     */
+    public function getService( $name )
+    {
+        return $this->getApplication()
+                    ->getServiceManager()
+                    ->get( $name );
     }
 
 }
