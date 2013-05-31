@@ -17,6 +17,11 @@ class LoaderListener implements ListenerAggregateInterface
 {
 
     /**
+     * @var array
+     */
+    protected $config = array();
+
+    /**
      * @var \Zend\Db\Adapter\Adapter
      */
     protected $dbAdapter;
@@ -44,6 +49,11 @@ class LoaderListener implements ListenerAggregateInterface
      */
     protected function loadConfig()
     {
+        if ( empty( $this->dbAdapter ) )
+        {
+            return $this->config;
+        }
+
         $platform = $this->dbAdapter->getPlatform();
         $driver   = $this->dbAdapter->getDriver();
 
@@ -57,15 +67,16 @@ class LoaderListener implements ListenerAggregateInterface
              LIMIT 1
         ' );
 
-        $add    = array();
-        $result = $query->execute();
+        $this->config   = array();
+        $result         = $query->execute();
 
         if ( $result->getAffectedRows() > 0 )
         {
             foreach ( $result as $cache )
             {
-                $add = ArrayUtils::merge(
-                    $add, (array) unserialize( $cache['value'] )
+                $this->config = ArrayUtils::merge(
+                    $this->config,
+                    (array) unserialize( $cache['value'] )
                 );
             }
         }
@@ -92,8 +103,8 @@ class LoaderListener implements ListenerAggregateInterface
                     $curr       = & $curr[$sub];
                 }
 
-                $curr = $value;
-                $add  = ArrayUtils::merge( $add, $entry );
+                $curr           = $value;
+                $this->config   = ArrayUtils::merge( $this->config, $entry );
             }
 
             $query = $this->dbAdapter->query( '
@@ -108,12 +119,13 @@ class LoaderListener implements ListenerAggregateInterface
 
             $query->execute( array(
                 'key'   => 'ini-cache',
-                'value' => serialize( $add ),
+                'value' => serialize( $this->config ),
                 'type'  => 'ini-cache',
             ) );
         }
 
-        return $add;
+        $this->dbAdapter = null;
+        return $this->config;
     }
 
     /**
