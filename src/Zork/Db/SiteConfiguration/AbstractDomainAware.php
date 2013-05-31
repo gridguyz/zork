@@ -31,9 +31,16 @@ abstract class AbstractDomainAware implements SiteConfigurationInterface
 
         if ( empty( $this->domain ) )
         {
-            $this->domain = isset( $_SERVER['HTTP_HOST'] )
-                ? $_SERVER['HTTP_HOST']
-                : $_SERVER['SERVER_NAME'];
+            switch ( true )
+            {
+                case isset( $_SERVER['HTTP_HOST'] ):
+                    $this->domain = $_SERVER['HTTP_HOST'];
+                    break;
+
+                case isset( $_SERVER['SERVER_NAME'] ):
+                    $this->domain = $_SERVER['SERVER_NAME'];
+                    break;
+            }
         }
 
         // @codeCoverageIgnoreEnd
