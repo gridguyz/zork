@@ -18,7 +18,7 @@ class ServiceManager extends Base
      * @param   \Zend\ServiceManager\ServiceManager $serviceManager
      * @return  \Zend\ServiceManager\ServiceManager
      */
-    protected static function unregisterServices( Base $serviceManager )
+    public static function unregisterServices( Base $serviceManager )
     {
         foreach ( $serviceManager->instances as &$instance )
         {
