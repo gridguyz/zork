@@ -107,13 +107,7 @@ class AbstractHttpControllerTestCase extends BaseTestCase
 
         $sm = $this->getApplication()
                    ->getServiceManager();
-
-        if ( $sm->has( 'DbAdapter' ) )
-        {
-            $sm->setAllowOverride( true )
-               ->setService( 'DbAdapter', null );
-        }
-
+        \Zork\ServiceManager\ServiceManager::unregisterServices( $sm );
         $sm = null;
 
         $config = $this->getApplicationConfig();
