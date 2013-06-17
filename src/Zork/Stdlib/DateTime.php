@@ -70,7 +70,7 @@ class DateTime extends Base implements ArrayAccess
     public static function __set_state( $array )
     {
         $date = parent::__set_state( $array );
-        return new static( '@' . $date->format( 'U' ) );
+        return new static( $date->format( DateTime::ISO8601 ) );
     }
 
     /**
@@ -87,7 +87,7 @@ class DateTime extends Base implements ArrayAccess
             ? parent::createFromFormat( $format, $time, $timezone )
             : parent::createFromFormat( $format, $time );
 
-        return new static( '@' . $date->format( 'U' ) );
+        return new static( $date->format( DateTime::ISO8601 ) );
     }
 
     /**
