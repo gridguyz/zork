@@ -14,15 +14,6 @@ class FormSelect extends ZendFormSelect
 {
 
     /**
-     * Translatable attributes
-     *
-     * @var array
-     */
-    protected $translatableAttributes = array(
-        'label' => true,
-    );
-
-    /**
      * Render an array of options
      *
      * Individual options should be of the form:
