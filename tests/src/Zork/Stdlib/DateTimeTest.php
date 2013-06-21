@@ -73,7 +73,7 @@ class DateTimeTest extends TestCase
     public function testFindMin()
     {
         $dates = $this->dates();
-        $min   = date( 'Y-m-d', strtotime( '-1 day' ) );
+        $min   = ( new \DateTime( '@' . strtotime( '-1 day' ) ) )->format( 'Y-m-d' );
 
         $this->assertEquals( $min, DateTime::min( $dates )->format( 'Y-m-d' ) );
         $this->assertEquals( $min, DateTime::min( new ArrayIterator( $dates ) )->format( 'Y-m-d' ) );
@@ -86,7 +86,7 @@ class DateTimeTest extends TestCase
     public function testFindMax()
     {
         $dates = $this->dates();
-        $max   = date( 'Y-m-d', strtotime( '+1 day' ) );
+        $max   = ( new \DateTime( '@' . strtotime( '+1 day' ) ) )->format( 'Y-m-d' );
 
         $this->assertEquals( $max, DateTime::max( $dates )->format( 'Y-m-d' ) );
         $this->assertEquals( $max, DateTime::max( new ArrayIterator( $dates ) )->format( 'Y-m-d' ) );
