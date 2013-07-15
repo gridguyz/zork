@@ -13,10 +13,10 @@ class FunctionCall extends Expression
 {
 
     /**
-     * @param string|null $name
-     * @param array $arguments
-     * @param array $types
-     * @return array
+     * @param   string|null $name
+     * @param   array       $arguments
+     * @param   array       $types
+     * @return  array
      */
     protected function getExpressionParametersTypes( $name,
                                                      array $arguments,
@@ -29,17 +29,23 @@ class FunctionCall extends Expression
         {
             $parameters = array_values( $arguments );
             $types      = array_values( $types );
+
+            while ( count( $types ) < count( $parameters ) )
+            {
+                $types[] = self::TYPE_VALUE;
+            }
+
             array_unshift( $parameters, $name );
             array_unshift( $types, self::TYPE_IDENTIFIER );
 
             if ( empty( $arguments ) )
             {
-                $expression = '?()';
+                $expression = self::PLACEHOLDER . '()';
             }
             else
             {
-                $expression = '?(' .
-                    implode( ', ', array_fill( 0, count( $arguments ), '?' ) ) .
+                $expression = self::PLACEHOLDER . '(' .
+                    implode( ', ', array_fill( 0, count( $arguments ), self::PLACEHOLDER ) ) .
                 ')';
             }
         }
@@ -50,13 +56,13 @@ class FunctionCall extends Expression
     /**
      * Function call expression
      *
-     * @param string $name
-     * @param array $arguments
-     * @param array $types
+     * @param   string  $name
+     * @param   array   $arguments
+     * @param   array   $types
      */
-    public function __construct( $name = null,
-                                 array $arguments = array(),
-                                 array $types = array() )
+    public function __construct( $name              = null,
+                                 array $arguments   = array(),
+                                 array $types       = array() )
     {
         list( $expression,
               $parameters,
@@ -68,15 +74,14 @@ class FunctionCall extends Expression
     }
 
     /**
-     *
-     * @param string|null $name
-     * @param array $arguments
-     * @param array $types
-     * @return FunctionCall
+     * @param   string|null $name
+     * @param   array       $arguments
+     * @param   array       $types
+     * @return  FunctionCall
      */
-    public function call( $name = null,
-                          array $arguments = array(),
-                          array $types = array() )
+    public function call( $name             = null,
+                          array $arguments  = array(),
+                          array $types      = array() )
     {
         list( $expression,
               $parameters,
