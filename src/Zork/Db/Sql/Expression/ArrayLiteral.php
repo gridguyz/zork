@@ -44,7 +44,7 @@ class ArrayLiteral extends Expression
     }
 
     /**
-     * Function call expression
+     * Array literal expression
      *
      * @param   array   $values
      * @param   array   $types
