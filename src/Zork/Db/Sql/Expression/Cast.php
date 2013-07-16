@@ -195,7 +195,7 @@ class Cast extends Expression
         $parameters = array( $value );
         $types      = array( $type );
         $expression = sprintf(
-            'CAST( %s AS %s )',
+            'CAST(%s AS %s)',
             self::PLACEHOLDER,
             $escapeCast ? self::PLACEHOLDER : $cast
         );
