@@ -481,8 +481,8 @@ class Form extends BaseHelper
      * @param string $class
      * @return string
      */
-    protected function renderFieldset( FieldsetInterface $fieldset,
-                                       $class = '' )
+    public function renderFieldset( FieldsetInterface $fieldset,
+                                    $class = '' )
     {
         $markup     = '';
         $elements   = array();
