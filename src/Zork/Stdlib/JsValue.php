@@ -71,7 +71,7 @@ class JsValue
      *
      * @return int
      */
-    public function lastError()
+    public static function lastError()
     {
         $last = static::$lastError;
         static::$lastError = static::ERROR_NONE;
@@ -86,7 +86,7 @@ class JsValue
      * @param       bool    $warning
      * @return      bool
      */
-    protected function error( $code, $warning = false, $param = null )
+    protected static function error( $code, $warning = false, $param = null )
     {
         static $messages = array(
             static::ERROR_SYNTAX_ERROR              => 'syntax error',
@@ -193,6 +193,16 @@ class JsValue
 
                 case 'false':
                     return false;
+
+                case 'NaN':
+                    return NAN;
+
+                case 'Infinity':
+                case '+Infinity':
+                    return INF;
+
+                case '-Infinity':
+                    return -INF;
 
                 default:
                     return null;
@@ -612,7 +622,8 @@ class JsValue
      */
     protected static function acceptConstructor( &$string, $class, $flags )
     {
-        $args = array();
+        $args   = array();
+        $result = null;
 
         if ( '(' === $string[0] )
         {
@@ -649,21 +660,34 @@ class JsValue
         switch ( $class )
         {
             case 'Number':
-                return isset( $args[0] ) ? (float) $args[0] : 0;
+                $result = isset( $args[0] ) ? (float) $args[0] : 0;
+                break;
 
             case 'String':
-                return isset( $args[0] ) ? (string) $args[0] : '';
+                $result = isset( $args[0] ) ? (string) $args[0] : '';
+                break;
 
             case 'Boolean':
-                return isset( $args[0] ) ? (bool) $args[0] : false;
+                $result = isset( $args[0] ) ? (bool) $args[0] : false;
+                break;
 
             case 'Object':
-                return isset( $args[0] ) ? $args[0] : null;
+                if ( isset( $args[0] ) )
+                {
+                    $result = $args[0];
+
+                    if ( $flags & static::OBJECT_AS_ARRAY )
+                    {
+                        $result = (array) $result;
+                    }
+                }
+                break;
 
             case 'Array':
-                return count( $args ) === 1 && is_int( $args[0] )
+                $result = count( $args ) === 1 && is_int( $args[0] )
                     ? array_fill( 0, $args[0], null )
                     : $args;
+                break;
 
             case 'Date':
                 switch ( true )
@@ -693,23 +717,32 @@ class JsValue
                             . '.' . ( empty( $args[6] ) ? '00' : str_pad( (int) $args[6], 2, '0', STR_PAD_LEFT ) );
                 }
 
-                return new DateTime( $time );
+                $result = new DateTime( $time );
+
+                if ( $flags & static::OBJECT_AS_ARRAY )
+                {
+                    $result = array(
+                        'unix'      => $result->format( 'U' ),
+                        'iso8601'   => $result->format( DateTime::ISO8601 ),
+                        'rfc2822'   => $result->format( DateTime::RFC2822 ),
+                    );
+                }
+                break;
 
             case 'RegExp':
                 $result = array(
                     'pattern'   => isset( $args[0] ) ? $args[0] : '',
                     'flags'     => isset( $args[1] ) ? $args[1] : '',
                 );
+
+                if ( ! ( $flags & static::OBJECT_AS_ARRAY ) )
+                {
+                    $result = (object) $result;
+                }
                 break;
 
             default:
                 static::error( static::ERROR_UNKNOWN_CONSTRUCTOR, false, $class );
-                return null;
-        }
-
-        if ( ! ( $flags & static::OBJECT_AS_ARRAY ) )
-        {
-            $result = (object) $result;
         }
 
         return $result;
