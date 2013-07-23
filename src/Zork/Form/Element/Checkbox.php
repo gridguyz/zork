@@ -16,7 +16,10 @@ class Checkbox extends ElementBase
                        TranslatorSettingsAwareInterface
 {
 
-    use InputProviderTrait;
+    use InputProviderTrait
+    {
+        InputProviderTrait::setOptions as private setOptionsInputProviderTrait;
+    }
 
     /**
      * @var string
@@ -77,7 +80,7 @@ class Checkbox extends ElementBase
      */
     public function setOptions( $options )
     {
-        parent::setOptions( $options );
+        $this->setOptionsInputProviderTrait( $options );
 
         if ( isset( $this->options['label_enable'] ) )
         {
