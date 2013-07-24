@@ -4,6 +4,7 @@ namespace Zork\Cache;
 
 use Traversable;
 use Zend\Stdlib\ArrayUtils;
+use Zend\Cache\Storage\StorageInterface;
 
 /**
  * CacheManager
@@ -138,9 +139,40 @@ class CacheManager
     public function createStorage( $namespace = self::DEFAULT_NAMESPACE )
     {
         $options = $this->getStorageOptions();
-        $options['namespace'] = empty( $options['namespace'] ) ? $namespace : $options['namespace'] . $namespace;
+
+        if ( isset( $options['adapter'] ) )
+        {
+            if ( $options['adapter'] instanceof StorageInterface )
+            {
+                $adapterOptions = $options['adapter']->getOptions();
+
+                if ( empty( $adapterOptions['namespace'] ) )
+                {
+                    $adapterOptions['namespace'] = $namespace;
+                }
+                else
+                {
+                    $adapterOptions['namespace'] .= '\\' . $namespace;
+                }
+
+                $options['adapter']->setOptions( $adapterOptions );
+            }
+            else if ( isset( $options['adapter']['options'] ) )
+            {
+                if ( empty( $options['adapter']['options']['namespace'] ) )
+                {
+                    $options['adapter']['options']['namespace'] = $namespace;
+                }
+                else
+                {
+                    $options['adapter']['options']['namespace'] .= '\\' . $namespace;
+                }
+            }
+        }
+
         $factory = empty( $options['factory'] ) ? 'Zend\Cache\StorageFactory' : $options['factory'];
         unset( $options['factory'] );
+
         return $factory::factory( $options );
     }
 
