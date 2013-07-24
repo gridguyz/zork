@@ -40,7 +40,7 @@ class CacheManager
     private $patternCache       = array();
 
     /**
-     * @return array
+     * @return  array
      */
     public function getStorageOptions()
     {
@@ -48,8 +48,8 @@ class CacheManager
     }
 
     /**
-     * @param array|\Traversable $storageOptions
-     * @return \Zork\Cache\CacheManager
+     * @param   array|\Traversable  $storageOptions
+     * @return  \Zork\Cache\CacheManager
      */
     public function setStorageOptions( $storageOptions )
     {
@@ -71,8 +71,8 @@ class CacheManager
     }
 
     /**
-     * @param array|\Traversable $patternOptions
-     * @return \Zork\Cache\CacheManager
+     * @param   array|\Traversable  $patternOptions
+     * @return  \Zork\Cache\CacheManager
      */
     public function setPatternOptions( $patternOptions )
     {
@@ -86,8 +86,8 @@ class CacheManager
     }
 
     /**
-     * @param array|null $storageOptions
-     * @param string|null $patternOptions
+     * @param   array|null  $storageOptions
+     * @param   string|null $patternOptions
      */
     public function __construct( $storageOptions = null,
                                  $patternOptions = null )
@@ -106,8 +106,8 @@ class CacheManager
     /**
      * Factory a cache-manager
      *
-     * @param array $options
-     * @return \Zork\Cache\CacheManager
+     * @param   array   $options
+     * @return  \Zork\Cache\CacheManager
      */
     public static function factory( array $options )
     {
@@ -133,8 +133,26 @@ class CacheManager
     }
 
     /**
-     * @param string $namespace
-     * @return \Zend\Cache\Storage\StorageInterface
+     * Create valid namepsace
+     *
+     * @param   string  $namespace
+     * @return  string
+     */
+    protected function createValidNamespace( $namespace )
+    {
+        return trim(
+            preg_replace(
+                array( '#\\\\+#', '#[^a-z0-9_-]+#' ),
+                array( '-', '_' ),
+                strtolower( $namespace )
+            ),
+            '-'
+        );
+    }
+
+    /**
+     * @param   string $namespace
+     * @return  \Zend\Cache\Storage\StorageInterface
      */
     public function createStorage( $namespace = self::DEFAULT_NAMESPACE )
     {
@@ -155,6 +173,10 @@ class CacheManager
                     $adapterOptions['namespace'] .= '\\' . $namespace;
                 }
 
+                $adapterOptions['namespace'] = $this->createValidNamespace(
+                    $adapterOptions['namespace']
+                );
+
                 $options['adapter']->setOptions( $adapterOptions );
             }
             else if ( isset( $options['adapter']['options'] ) )
@@ -167,6 +189,10 @@ class CacheManager
                 {
                     $options['adapter']['options']['namespace'] .= '\\' . $namespace;
                 }
+
+                $options['adapter']['options']['namespace'] = $this->createValidNamespace(
+                    $options['adapter']['options']['namespace']
+                );
             }
         }
 
@@ -177,8 +203,8 @@ class CacheManager
     }
 
     /**
-     * @param string $namespace
-     * @return \Zend\Cache\Storage\StorageInterface
+     * @param   string  $namespace
+     * @return  \Zend\Cache\Storage\StorageInterface
      */
     public function getStorage( $namespace = self::DEFAULT_NAMESPACE )
     {
@@ -191,8 +217,8 @@ class CacheManager
     }
 
     /**
-     * @param string $namespace
-     * @return \Zend\Cache\Pattern\PatternInterface
+     * @param   string  $namespace
+     * @return  \Zend\Cache\Pattern\PatternInterface
      */
     public function createPattern( $name )
     {
@@ -212,8 +238,8 @@ class CacheManager
     }
 
     /**
-     * @param string $namespace
-     * @return \Zend\Cache\Pattern\PatternInterface
+     * @param   string  $namespace
+     * @return  \Zend\Cache\Pattern\PatternInterface
      */
     public function getPattern( $name )
     {

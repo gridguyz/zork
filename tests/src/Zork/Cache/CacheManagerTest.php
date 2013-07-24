@@ -59,7 +59,7 @@ class CacheManagerTest extends TestCase
                     'adapter'   => array(
                         'name'      => 'memory',
                         'options'   => array(
-                            'namespace' => 'Prefix\\SampleNamespace',
+                            'namespace' => 'prefix-samplenamespace',
                         ),
                     ),
                 ) ) )
