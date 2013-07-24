@@ -44,9 +44,11 @@ class CacheManagerTest extends TestCase
         $manager = CacheManager::factory( array(
             'storage' => array(
                 'factory'   => $factory,
-                'namespace' => 'Prefix\\',
                 'adapter'   => array(
-                    'name' => 'memory'
+                    'name'      => 'memory',
+                    'options'   => array(
+                        'namespace' => 'Prefix',
+                    ),
                 ),
             ),
         ) );
@@ -54,9 +56,11 @@ class CacheManagerTest extends TestCase
         $factory::staticExpects( $this->once() )
                 ->method( 'factory' )
                 ->with( $this->equalTo( array(
-                    'namespace' => 'Prefix\\SampleNamespace',
                     'adapter'   => array(
-                        'name' => 'memory'
+                        'name'      => 'memory',
+                        'options'   => array(
+                            'namespace' => 'Prefix\\SampleNamespace',
+                        ),
                     ),
                 ) ) )
                 ->will( $this->returnValue( null ) );
