@@ -58,7 +58,7 @@ class Translator extends ZendTranslator
             }
 
             $requiredKeys = array( 'type', 'base_dir', 'pattern' );
-            foreach ( $options['translation_file_patterns'] as $pattern )
+            foreach ( $options['translation_file_my_patterns'] as $pattern )
             {
                 foreach ( $requiredKeys as $key )
                 {
@@ -135,13 +135,13 @@ class Translator extends ZendTranslator
             $this->myMessages[$textDomain] = array();
         }
 
+        $messagesLoaded  = false;
+        $messagesLoaded |= $this->loadMyMessagesFromMyPatterns( $textDomain, $locale );
+
         if ( ! isset( $this->myMessages[$textDomain][$locale] ) )
         {
             $this->myMessages[$textDomain][$locale] = array();
         }
-
-        $messagesLoaded  = false;
-        $messagesLoaded |= $this->loadMyMessagesFromMyPatterns( $textDomain, $locale );
     }
 
     /**
