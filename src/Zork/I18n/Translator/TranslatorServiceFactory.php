@@ -23,7 +23,7 @@ class TranslatorServiceFactory extends ZendTranslatorServiceFactory
     {
         /* @var $translator \Zork\I18n\Translator\Translator */
         $locale     = $serviceLocator->get( 'Locale' );
-        $config     = $serviceLocator->get('Config');
+        $config     = $serviceLocator->get( 'Config' );
         $trConfig   = isset( $config['translator'] ) ? $config['translator'] : array();
         $translator = Translator::factory( $trConfig );
         $translator->setFallbackLocale( $locale->getFallback() );
