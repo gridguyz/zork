@@ -327,6 +327,10 @@ class Form extends BaseHelper
                 {
                     $description['attributes']['class'] = 'description';
                 }
+                else
+                {
+                    $description['attributes']['class'] .= ' description';
+                }
             }
             else
             {
@@ -360,7 +364,9 @@ class Form extends BaseHelper
             }
 
             $markup .= sprintf( $this->descriptionOpen, $attributes );
-            $markup .= $description['label'];
+            $markup .= str_replace( '%locale%',
+                                    $this->view->locale(),
+                                    $description['label'] );
             $markup .= $this->descriptionClose;
             $markup .= PHP_EOL;
         }
