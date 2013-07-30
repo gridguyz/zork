@@ -528,12 +528,16 @@ class Form extends BaseHelper
                 $markup .= PHP_EOL;
                 $markup .= sprintf( '<legend>%s</legend>', $key );
                 $markup .= PHP_EOL;
+                $markup .= sprintf( $this->formOpen, 'display-group-items' );
+                $markup .= PHP_EOL;
 
                 foreach ( $item as $element )
                 {
                     $markup .= $this->renderFieldsetItem( $element );
                 }
 
+                $markup .= PHP_EOL;
+                $markup .= $this->formClose;
                 $markup .= PHP_EOL;
                 $markup .= '</fieldset>';
                 $markup .= PHP_EOL;
