@@ -41,21 +41,29 @@ class File implements Iterator,
     /**
      * Constructor
      *
-     * @param   string  $pathname
+     * @param   string|resource  $pathname
      * @throws  Exception\InvalidArgumentException
      */
-    public function __construct( $pathname )
+    public function __construct( $pathnameOrResource )
     {
-        if ( ! is_file( $pathname ) )
+        if ( is_resource( $pathnameOrResource ) &&
+             in_array( get_resource_type( $pathnameOrResource ),
+                       array( 'file', 'stream' ) ) )
+        {
+            $this->handle = $pathnameOrResource;
+        }
+        else if ( is_file( $pathnameOrResource ) )
+        {
+            $this->pathname = (string) $pathnameOrResource;
+        }
+        else
         {
             throw new Exception\InvalidArgumentException( sprintf(
-                '%s: "%s" is not a file',
+                '%s: "%s" is not a file, neither a stream resource',
                 __METHOD__,
-                $pathname
+                $pathnameOrResource
             ) );
         }
-
-        $this->pathname = $pathname;
     }
 
     /**
@@ -115,7 +123,7 @@ class File implements Iterator,
         }
 
         $this->line     = 0;
-        $this->current  = fgets( $this->handle );
+        $this->current  = fgets( $this->handle, static::MAX_LINE_LENGTH );
     }
 
     /**
@@ -162,7 +170,7 @@ class File implements Iterator,
     {
         if ( $this->handle )
         {
-            $line = fgets( $this->handle );
+            $line = fgets( $this->handle, static::MAX_LINE_LENGTH );
 
             if ( $line === false )
             {
