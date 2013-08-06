@@ -13,10 +13,10 @@ class Date extends DateTime
     /**
      * @var int
      */
-    protected $timeFormat   = self::NONE;
+    protected $timeFormat = self::NONE;
 
     /**
-     * @param null|int $dateFormat
+     * @param   null|int    $dateFormat
      */
     public function __construct( $dateFormat = null )
     {

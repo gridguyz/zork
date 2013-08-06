@@ -50,7 +50,7 @@ class DateTime extends AbstractHelper
     protected $timeFormat   = self::LONG;
 
     /**
-     * @return int
+     * @return  int
      */
     public function getDateFormat()
     {
@@ -58,7 +58,7 @@ class DateTime extends AbstractHelper
     }
 
     /**
-     * @return int
+     * @return  int
      */
     public function getTimeFormat()
     {
@@ -66,8 +66,8 @@ class DateTime extends AbstractHelper
     }
 
     /**
-     * @param int $dateFormat
-     * @return \Core\View\Helper\RowSet\Type\DateTime
+     * @param   int $dateFormat
+     * @return  \Zork\I18n\View\Helper\DateTime
      */
     public function setDateFormat( $dateFormat )
     {
@@ -76,8 +76,8 @@ class DateTime extends AbstractHelper
     }
 
     /**
-     * @param int $timeFormat
-     * @return \Core\View\Helper\RowSet\Type\DateTime
+     * @param   int $timeFormat
+     * @return  \Zork\I18n\View\Helper\DateTime
      */
     public function setTimeFormat( $timeFormat )
     {
@@ -86,8 +86,8 @@ class DateTime extends AbstractHelper
     }
 
     /**
-     * @param null|int $dateFormat
-     * @param null|int $timeFormat
+     * @param   null|int    $dateFormat
+     * @param   null|int    $timeFormat
      */
     public function __construct( $dateFormat = null, $timeFormat = null )
     {
@@ -105,10 +105,12 @@ class DateTime extends AbstractHelper
     /**
      * Display a single value
      *
-     * @param null|int|string|\DateTime $value
-     * @return string
+     * @param   null|int|string|\DateTime   $value
+     * @return  string
      */
-    public function __invoke( $value = null )
+    public function __invoke( $value        = null,
+                              $dateFormat   = null,
+                              $timeFormat   = null )
     {
         if ( null === $value )
         {
@@ -127,11 +129,12 @@ class DateTime extends AbstractHelper
             }
         }
 
-        return $this->view->dateFormat(
-            $value,
-            $this->dateFormat,
-            $this->timeFormat
-        );
+        return $this->getView()
+                    ->dateFormat(
+                        $value,
+                        $dateFormat === null ? $this->dateFormat : $dateFormat,
+                        $timeFormat === null ? $this->timeFormat : $timeFormat
+                    );
     }
 
 }
