@@ -35,7 +35,7 @@ class ExtraHandler extends Simple
             );
         }
 
-        return parent::format( $event );
+        return @ parent::format( $event );
     }
 
 }
