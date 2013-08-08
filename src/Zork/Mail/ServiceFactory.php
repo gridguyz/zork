@@ -4,6 +4,7 @@ namespace Zork\Mail;
 
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
+use Zend\ServiceManager\Exception\ServiceNotFoundException;
 
 /**
  * ServiceFactory
@@ -24,8 +25,29 @@ class ServiceFactory implements FactoryInterface
         // Configure the mail
         $config = $serviceLocator->get( 'Configuration' );
         $mail   = isset( $config['mail'] ) ? $config['mail'] : array();
-        $domain = $serviceLocator->get( 'SiteInfo' )
-                                 ->getDomain();
+
+        try
+        {
+            $domain = $serviceLocator->get( 'SiteInfo' )
+                                     ->getDomain();
+        }
+        catch ( ServiceNotFoundException $ex )
+        {
+            switch ( true )
+            {
+                case isset( $_SERVER['HTTP_HOST'] ):
+                    $domain = $_SERVER['HTTP_HOST'];
+                    break;
+
+                case isset( $_SERVER['SERVER_NAME'] ):
+                    $domain = $_SERVER['SERVER_NAME'];
+                    break;
+
+                default:
+                    $domain = 'localhost';
+                    break;
+            }
+        }
 
         if ( empty( $mail['defaultFrom']['email'] ) )
         {
