@@ -251,7 +251,7 @@ class Process
             $this->getRunCommand(),
             $descriptorspec,
             $this->pipes,
-            $this->workingDirectory,
+            $this->workingDirectory ?: getcwd(),
             $this->environmentVariables,
             $this->options
         );
