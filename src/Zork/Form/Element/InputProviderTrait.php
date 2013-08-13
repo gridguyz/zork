@@ -795,7 +795,7 @@ trait InputProviderTrait
 
         if ( isset( $this->options['not_identical'] ) )
         {
-            $this->setIdentical( $this->options['not_identical'] );
+            $this->setNotIdentical( $this->options['not_identical'] );
         }
 
         if ( isset( $this->options['alternate'] ) )
