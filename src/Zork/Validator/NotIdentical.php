@@ -194,8 +194,8 @@ class NotIdentical extends AbstractValidator
 
         $strict = $this->getStrict();
 
-        if ( ( $strict && ( $value !== $token ) ) ||
-             ( ! $strict && ( $value != $token ) ) )
+        if ( ( $strict && ( $value === $token ) ) ||
+             ( ! $strict && ( $value == $token ) ) )
         {
             $this->error( self::SAME );
             return false;
