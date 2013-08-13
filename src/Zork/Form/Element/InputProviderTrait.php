@@ -244,13 +244,80 @@ trait InputProviderTrait
     }
 
     /**
+     * Convert token to string
+     *
+     * @param   null|string|array   $token
+     * @return  null|string
+     */
+    private function convertTokenToString( $token )
+    {
+        if ( empty( $token ) )
+        {
+            return null;
+        }
+
+        if ( is_array( $token ) )
+        {
+            $result = null;
+
+            foreach ( $token as $part )
+            {
+                if ( empty( $result ) )
+                {
+                    $result = rawurlencode( $part );
+                }
+                else
+                {
+                    $result .= '[' . rawurlencode( $part ) . ']';
+                }
+            }
+
+            return $result;
+        }
+
+        return (string) $token;
+    }
+
+    /**
+     * Convert string to token
+     *
+     * @param   null|string $tokenString
+     * @return  null|string|array
+     */
+    private function convertStringToToken( $tokenString )
+    {
+        if ( empty( $tokenString ) )
+        {
+            return null;
+        }
+
+        $token = (string) $tokenString;
+
+        if ( preg_match( '#^[^\[\]]+(\[[^\[\]]*\])+$#', $token ) )
+        {
+            $tokp  = strtok( $token, '[' );
+            $token = array();
+
+            while ( false !== $tokp )
+            {
+                $token[] = rawurldecode( $tokp );
+                $tokp = strtok( '][' );
+            }
+        }
+
+        return $token;
+    }
+
+    /**
      * Get identical-token
      *
      * @return string
      */
     public function getIdentical()
     {
-        return $this->getAttribute( 'data-validate-identical' );
+        return $this->convertStringToToken(
+            $this->getAttribute( 'data-validate-identical' )
+        );
     }
 
     /**
@@ -263,7 +330,7 @@ trait InputProviderTrait
     {
         return $this->setAttribute(
             'data-validate-identical',
-            empty( $token ) ? null : (string) $token
+            $this->convertTokenToString( $token )
         );
     }
 
@@ -291,7 +358,9 @@ trait InputProviderTrait
      */
     public function getNotIdentical()
     {
-        return $this->getAttribute( 'data-validate-not-identical' );
+        return $this->convertStringToToken(
+            $this->getAttribute( 'data-validate-not-identical' )
+        );
     }
 
     /**
@@ -304,7 +373,7 @@ trait InputProviderTrait
     {
         return $this->setAttribute(
             'data-validate-not-identical',
-            empty( $token ) ? null : (string) $token
+            $this->convertTokenToString( $token )
         );
     }
 
@@ -332,7 +401,9 @@ trait InputProviderTrait
      */
     public function getAlternate()
     {
-        return $this->getAttribute( 'data-validate-alternate' );
+        return $this->convertStringToToken(
+            $this->getAttribute( 'data-validate-alternate' )
+        );
     }
 
     /**
@@ -345,7 +416,7 @@ trait InputProviderTrait
     {
         return $this->setAttribute(
             'data-validate-alternate',
-            empty( $token ) ? null : (string) $token
+            $this->convertTokenToString( $token )
         );
     }
 
@@ -373,7 +444,9 @@ trait InputProviderTrait
      */
     public function getLessThan()
     {
-        return $this->getAttribute( 'data-validate-less-than' );
+        return $this->convertStringToToken(
+            $this->getAttribute( 'data-validate-less-than' )
+        );
     }
 
     /**
@@ -386,7 +459,7 @@ trait InputProviderTrait
     {
         return $this->setAttribute(
             'data-validate-less-than',
-            empty( $token ) ? null : (string) $token
+            $this->convertTokenToString( $token )
         );
     }
 
@@ -414,7 +487,9 @@ trait InputProviderTrait
      */
     public function getMoreThan()
     {
-        return $this->getAttribute( 'data-validate-more-than' );
+        return $this->convertStringToToken(
+            $this->getAttribute( 'data-validate-more-than' )
+        );
     }
 
     /**
@@ -427,7 +502,7 @@ trait InputProviderTrait
     {
         return $this->setAttribute(
             'data-validate-more-than',
-            empty( $token ) ? null : (string) $token
+            $this->convertTokenToString( $token )
         );
     }
 
