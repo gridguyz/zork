@@ -6,8 +6,9 @@ use Traversable;
 use Zend\Stdlib\ArrayUtils;
 use Zend\Validator\Regex        as RegexValidator;
 use Zend\Validator\Explode      as ExplodeValidator;
-use Zend\Validator\Identical    as IdenticalValidator;
 use Zend\Validator\StringLength as LengthValidator;
+use Zend\Validator\Identical    as IdenticalValidator;
+use Zork\Validator\NotIdentical as NotIdenticalValidator;
 use Zork\Validator\Alternate    as AlternateValidator;
 use Zork\Validator\Forbidden    as ForbiddenValidator;
 use Zork\Validator\LessThan     as LessThanValidator;
@@ -281,6 +282,47 @@ trait InputProviderTrait
         }
 
         return new IdenticalValidator( $token );
+    }
+
+    /**
+     * Get not-identical-token
+     *
+     * @return string
+     */
+    public function getNotIdentical()
+    {
+        return $this->getAttribute( 'data-validate-not-identical' );
+    }
+
+    /**
+     * Set not-identical-token
+     *
+     * @param string $token
+     * @return \Zork\Form\Element
+     */
+    public function setNotIdentical( $token )
+    {
+        return $this->setAttribute(
+            'data-validate-not-identical',
+            empty( $token ) ? null : (string) $token
+        );
+    }
+
+    /**
+     * Get not-identical-validator
+     *
+     * @return null|\Zork\Validator\NotIdentical
+     */
+    public function getNotIdenticalValidator()
+    {
+        $token = $this->getNotIdentical();
+
+        if ( empty( $token ) )
+        {
+            return null;
+        }
+
+        return new NotIdenticalValidator( $token );
     }
 
     /**
@@ -751,6 +793,11 @@ trait InputProviderTrait
             $this->setIdentical( $this->options['identical'] );
         }
 
+        if ( isset( $this->options['not_identical'] ) )
+        {
+            $this->setIdentical( $this->options['not_identical'] );
+        }
+
         if ( isset( $this->options['alternate'] ) )
         {
             $this->setAlternate( $this->options['alternate'] );
@@ -862,6 +909,13 @@ trait InputProviderTrait
         if ( $identicalValidator )
         {
             $spec['validators'][] = $identicalValidator;
+        }
+
+        $notIdenticalValidator = $this->getNotIdenticalValidator();
+
+        if ( $notIdenticalValidator )
+        {
+            $spec['validators'][] = $notIdenticalValidator;
         }
 
         $alternateValidator = $this->getAlternateValidator();
