@@ -207,26 +207,6 @@ class Process
     }
 
     /**
-     * Get php binary path
-     *
-     * @return  string
-     */
-    public static function getPhpBinary()
-    {
-        if ( defined( 'PHP_BINARY' ) )
-        {
-            return PHP_BINARY;
-        }
-
-        if ( defined( 'PHP_BINDIR' ) )
-        {
-            return PHP_BINDIR . DIRECTORY_SEPARATOR . 'php';
-        }
-
-        return 'php';
-    }
-
-    /**
      * Get run command
      *
      * @return  string|null
