@@ -109,6 +109,55 @@ abstract class AbstractAdminController extends AbstractActionController
                 }
             }
 
+            if ( isset( $page['dependencies'] ) )
+            {
+                foreach ( (array) $page['dependencies'] as $serviceName => $dependency )
+                {
+                    if ( isset( $dependency['service'] ) )
+                    {
+                        $serviceName = (string) $dependency['service'];
+                    }
+
+                    $service = $this->getServiceLocator()
+                                    ->get( $serviceName );
+
+                    if ( isset( $dependency['method'] ) )
+                    {
+                        $method = array( $service, $dependency['method'] );
+                    }
+                    else
+                    {
+                        $method = $service;
+                    }
+
+                    if ( isset( $dependency['arguments'] ) )
+                    {
+                        $args = (array) $dependency['arguments'];
+                    }
+                    else
+                    {
+                        $args = array();
+                    }
+
+                    $result = call_user_func_array( $method, $args );
+
+                    if ( isset( $dependency['result'] ) )
+                    {
+                        $enabled = $result == $dependency['result'];
+                    }
+                    else
+                    {
+                        $enabled = (bool) $result;
+                    }
+
+                    if ( ! $enabled )
+                    {
+                        unset( $pages[$key] );
+                        continue 2;
+                    }
+                }
+            }
+
             if ( isset( $page['pages'] ) )
             {
                 $page['pages'] = $this->injectComponents(
