@@ -79,6 +79,11 @@ class Process
     /**
      * @var array
      */
+    protected $mergeEnvironmentVariables = true;
+
+    /**
+     * @var array
+     */
     protected $options = array();
 
     /**
@@ -143,18 +148,19 @@ class Process
     /**
      * Set environment variables
      *
-     * @param   array|\Traversable|null $workingDirectory
+     * @param   array|\Traversable|null $environment
      * @return  Process
      */
     public function setEnvironmentVariables( $environment )
     {
+        if ( $environment instanceof Traversable )
+        {
+            $environment = ArrayUtils::iteratorToArray( $environment );
+        }
+
         if ( empty( $environment ) )
         {
             $environment = null;
-        }
-        else if ( $environment instanceof Traversable )
-        {
-            $environment = ArrayUtils::iteratorToArray( $environment );
         }
         else
         {
@@ -162,6 +168,18 @@ class Process
         }
 
         $this->environmentVariables = $environment;
+        return $this;
+    }
+
+    /**
+     * Set merge environment variables
+     *
+     * @param   bool    $merge
+     * @return  Process
+     */
+    public function setMergeEnvironmentVariables( $merge = true )
+    {
+        $this->mergeEnvironmentVariables = (bool) $merge;
         return $this;
     }
 
@@ -247,12 +265,24 @@ class Process
     public function open( array $descriptorspec = array() )
     {
         $this->close();
+
+        $environment = (array) $this->environmentVariables;
+
+        if ( empty( $environment ) )
+        {
+            $environment = $_ENV;
+        }
+        else if ( $this->mergeEnvironmentVariables )
+        {
+            $environment = array_merge( $_ENV, $environment );
+        }
+
         $this->resource = proc_open(
             $this->getRunCommand(),
             $descriptorspec,
             $this->pipes,
             $this->workingDirectory ?: getcwd(),
-            $this->environmentVariables,
+            $environment,
             $this->options
         );
 
