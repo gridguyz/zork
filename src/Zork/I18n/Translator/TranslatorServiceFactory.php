@@ -3,6 +3,7 @@
 namespace Zork\I18n\Translator;
 
 use Zend\ServiceManager\ServiceLocatorInterface;
+use Zend\ServiceManager\Exception\ServiceNotFoundException;
 use Zend\I18n\Translator\TranslatorServiceFactory as ZendTranslatorServiceFactory;
 
 /**
@@ -27,6 +28,19 @@ class TranslatorServiceFactory extends ZendTranslatorServiceFactory
         $trConfig   = isset( $config['translator'] ) ? $config['translator'] : array();
         $translator = Translator::factory( $trConfig );
         $translator->setFallbackLocale( $locale->getFallback() );
+        $translator->addMySchema( '_central' );
+
+        try
+        {
+            $schema = $serviceLocator->get( 'SiteInfo' )
+                                     ->getSchema();
+        }
+        catch ( ServiceNotFoundException $ex )
+        {
+            $schema = null;
+        }
+
+        $translator->addMySchema( $schema ?: '_template' );
         return $translator;
     }
 

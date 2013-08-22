@@ -24,6 +24,13 @@ class Translator extends ZendTranslator
     protected $myPatterns = array();
 
     /**
+     * Schemas used for loading my messages.
+     *
+     * @var array
+     */
+    protected $mySchemas = array();
+
+    /**
      * My messages loaded by the translator.
      *
      * @var array
@@ -70,7 +77,7 @@ class Translator extends ZendTranslator
                     }
                 }
 
-                $translator->addTranslationFileMyPattern(
+                $translator->addMyTranslationFilePattern(
                     $pattern['type'],
                     $pattern['base_dir'],
                     $pattern['pattern']
@@ -82,14 +89,14 @@ class Translator extends ZendTranslator
     }
 
     /**
-     * Add multiple translations with a file pattern.
+     * Add multiple my-translations with a file pattern.
      *
      * @param   string  $type
      * @param   string  $baseDir
      * @param   string  $pattern
      * @return  Translator
      */
-    public function addTranslationFileMyPattern( $type, $baseDir, $pattern )
+    public function addMyTranslationFilePattern( $type, $baseDir, $pattern )
     {
         $this->myPatterns[] = array(
             'type'    => $type,
@@ -98,6 +105,45 @@ class Translator extends ZendTranslator
         );
 
         return $this;
+    }
+
+    /**
+     * Add a my-schema
+     *
+     * @param   string  $schema
+     * @return  \Zork\I18n\Translator\Translator
+     */
+    public function addMySchema( $schema )
+    {
+        $this->mySchemas[] = (string) $schema;
+        return $this;
+    }
+
+    /**
+     * Set my-schemas
+     *
+     * @param   string  $schema
+     * @return  \Zork\I18n\Translator\Translator
+     */
+    public function setMySchemas( $schemas )
+    {
+        if ( $schemas instanceof Traversable )
+        {
+            $schemas = ArrayUtils::iteratorToArray( $schemas );
+        }
+
+        $this->mySchemas = array_filter( array_map( 'strval', (array) $schemas ) );
+        return $this;
+    }
+
+    /**
+     * Get my-schemas
+     *
+     * @return  array
+     */
+    public function getMySchemas()
+    {
+        return $this->mySchemas;
     }
 
     /**
@@ -136,7 +182,7 @@ class Translator extends ZendTranslator
         }
 
         $messagesLoaded  = false;
-        $messagesLoaded |= $this->loadMyMessagesFromMyPatterns( $textDomain, $locale );
+        $messagesLoaded |= $this->loadMyMessagesFromPatterns( $textDomain, $locale );
 
         if ( ! isset( $this->myMessages[$textDomain][$locale] ) )
         {
@@ -152,42 +198,59 @@ class Translator extends ZendTranslator
      * @return  bool
      * @throws  Exception\RuntimeException When specified loader is not a file loader
      */
-    protected function loadMyMessagesFromMyPatterns( $textDomain, $locale )
+    protected function loadMyMessagesFromPatterns( $textDomain, $locale )
     {
+        $loaders = array();
         $messagesLoaded = false;
 
-        foreach ( $this->myPatterns as $pattern )
+        foreach ( $this->mySchemas as $schema )
         {
-            $filename = $pattern['baseDir'] . '/' . sprintf(
-                $pattern['pattern'],
-                $textDomain,
-                $locale
-            );
-
-            if ( is_file( $filename ) )
+            foreach ( $this->myPatterns as $pattern )
             {
-                $loader = $this->getPluginManager()
-                               ->get( $pattern['type'] );
-
-                if ( ! $loader instanceof FileLoaderInterface )
+                if ( empty( $pattern['type'] ) )
                 {
                     throw new Exception\RuntimeException(
-                        'Specified loader is not a file loader'
+                        'Must specify loader'
                     );
                 }
 
-                $myMessages = $loader->load( $locale, $filename );
+                $filename = $pattern['baseDir'] . '/' . sprintf(
+                    $pattern['pattern'],
+                    $schema,
+                    $textDomain,
+                    $locale
+                );
 
-                if ( isset( $this->myMessages[$textDomain][$locale] ) )
+                if ( is_file( $filename ) )
                 {
-                    $this->myMessages[$textDomain][$locale]->merge( $myMessages );
-                }
-                else
-                {
-                    $this->myMessages[$textDomain][$locale] = $myMessages;
-                }
+                    $type = $pattern['type'];
 
-                $messagesLoaded = true;
+                    if ( ! isset( $loaders[$type] ) )
+                    {
+                        $loaders[$type] = $this->getPluginManager()
+                                               ->get( $type );
+
+                        if ( ! $loaders[$type] instanceof FileLoaderInterface )
+                        {
+                            throw new Exception\RuntimeException(
+                                'Specified loader is not a file loader'
+                            );
+                        }
+                    }
+
+                    $myMessages = $loaders[$type]->load( $locale, $filename );
+
+                    if ( isset( $this->myMessages[$textDomain][$locale] ) )
+                    {
+                        $this->myMessages[$textDomain][$locale]->merge( $myMessages );
+                    }
+                    else
+                    {
+                        $this->myMessages[$textDomain][$locale] = $myMessages;
+                    }
+
+                    $messagesLoaded = true;
+                }
             }
         }
 
