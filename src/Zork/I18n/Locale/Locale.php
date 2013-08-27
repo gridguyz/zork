@@ -281,9 +281,10 @@ class Locale
                         '/\s+/',
                         '/(^|,)(' . static::pregQuote( $locale, '/' ) . '[^;,]*|'
                             . static::pregQuote( $primary, '/' ) . '|\*)'
-                            . '(;q=[^,]+)?(,|$)/i'
+                            . '(;q=[^,]+)?(,|$)/i',
+                        '[,;]$'
                     ),
-                    array( '', '$1' ),
+                    array( '', '$1', '' ),
                     $header
                 );
 
