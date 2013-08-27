@@ -276,16 +276,23 @@ class Locale
                     return $primary;
                 }
 
-                $header = preg_replace(
+                $newHeader = preg_replace(
                     array(
                         '/\s+/',
-                        '/(^|,)(' . static::pregQuote( $locale, '/' ) . '|'
+                        '/(^|,)(' . static::pregQuote( $locale, '/' ) . '[^;,]*|'
                             . static::pregQuote( $primary, '/' ) . '|\*)'
                             . '(;q=[^,]+)?(,|$)/i'
                     ),
                     array( '', '$1' ),
                     $header
                 );
+
+                if ( $newHeader == $header )
+                {
+                    break;
+                }
+
+                $header = $newHeader;
             }
             // @codeCoverageIgnoreStart
             else
