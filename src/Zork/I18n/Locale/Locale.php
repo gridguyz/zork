@@ -14,6 +14,9 @@ use Zend\I18n\Exception;
 class Locale
 {
 
+    /**
+     * @const string
+     */
     const DEFAULT_LOCALE = 'en';
 
     /**
@@ -260,47 +263,46 @@ class Locale
         {
             $locale = IntlLocale::acceptFromHttp( $header );
 
-            if ( $locale )
-            {
-                $normalized = static::normalizeLocale( $locale );
-
-                if ( in_array( $normalized, $available ) )
-                {
-                    return $normalized;
-                }
-
-                $primary = IntlLocale::getPrimaryLanguage( $normalized );
-
-                if ( in_array( $primary, $available ) )
-                {
-                    return $primary;
-                }
-
-                $newHeader = preg_replace(
-                    array(
-                        '/\s+/',
-                        '/(^|,)(' . static::pregQuote( $locale, '/' ) . '[^;,]*|'
-                            . static::pregQuote( $primary, '/' ) . '|\*)'
-                            . '(;q=[^,]+)?(,|$)/i',
-                        '/[,;]$/'
-                    ),
-                    array( '', '$1', '' ),
-                    $header
-                );
-
-                if ( $newHeader == $header )
-                {
-                    break;
-                }
-
-                $header = $newHeader;
-            }
             // @codeCoverageIgnoreStart
-            else
+            if ( empty( $locale ) )
             {
                 break;
             }
             // @codeCoverageIgnoreEnd
+
+            $locale     = preg_replace( '/[_-]POSIX$/i', '', $locale );
+            $normalized = static::normalizeLocale( $locale );
+
+            if ( in_array( $normalized, $available ) )
+            {
+                return $normalized;
+            }
+
+            $primary = IntlLocale::getPrimaryLanguage( $normalized );
+
+            if ( in_array( $primary, $available ) )
+            {
+                return $primary;
+            }
+
+            $newHeader = preg_replace(
+                array(
+                    '/\s+/',
+                    '/(^|,)(' . static::pregQuote( $locale, '/' ) . '[^;,]*|'
+                        . static::pregQuote( $primary, '/' ) . '|\*)'
+                        . '(;q=[^,]+)?(,|$)/i',
+                    '/[,;]$/'
+                ),
+                array( '', '$1', '' ),
+                $header
+            );
+
+            if ( $newHeader == $header )
+            {
+                break;
+            }
+
+            $header = $newHeader;
         }
 
         return $this->getDefault();
