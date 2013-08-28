@@ -13,6 +13,11 @@ class CallbackMapIterator extends MapIterator
 {
 
     /**
+     * @var callable
+     */
+    protected $callback;
+
+    /**
      * Constructor
      *
      * @param   Traversable $innerIterator
