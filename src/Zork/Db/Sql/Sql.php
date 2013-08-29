@@ -14,22 +14,25 @@ class Sql extends ZendSql
 {
 
     /**
-     * @param string|array $name
-     * @return \Zork\Db\Sql\FunctionCall
+     * @param   string|array    $name
+     * @param   array           $args
+     * @param   string          $mode
+     * @return  \Zork\Db\Sql\FunctionCall
      */
-    public function functionCall( $name = null )
+    public function functionCall( $name = null, array $args = null, $mode = null )
     {
-        return new FunctionCall( $name );
+        return new FunctionCall( $name, $args, $mode );
     }
 
     /**
      * Call an sql-function & return it's result
      *
-     * @param string|array $name quoted with $platform->quoteIdentifierChain()
-     * @param array $args
-     * @return mixed
+     * @param   string|array    $name quoted with $platform->quoteIdentifierChain()
+     * @param   array           $args
+     * @param   string          $mode
+     * @return  mixed
      */
-    public function call( $name, array $args = array() )
+    public function call( $name, array $args = null, $mode = null )
     {
         if ( is_string( $name ) &&
              $this->table instanceof ZendTableIdentifier &&
@@ -38,34 +41,48 @@ class Sql extends ZendSql
             $name = array( $this->table->getSchema(), $name );
         }
 
-        $functionCall = new FunctionCall( $name );
-        $functionCall->arguments( $args );
+        $functionCall = new FunctionCall( $name, $args, $mode );
 
         /* @var $result \Zend\Db\Adapter\Driver\ResultInterface */
 
         $result = $this->prepareStatementForSqlObject( $functionCall )
                        ->execute();
+        $mode   = $functionCall->getMode();
 
-        if ( empty( $result ) )
+        if ( FunctionCall::MODE_RESULT_SET == $mode )
         {
+            return $result;
+        }
+
+        if ( FunctionCall::MODE_SINGLE == $mode )
+        {
+            if ( empty( $result ) )
+            {
+                return null;
+            }
+
+            $row = $result->current();
+
+            if ( empty( $row ) )
+            {
+                return null;
+            }
+
+            $resultKey = $functionCall->getResultKey();
+
+            if ( isset( $row[$resultKey] ) )
+            {
+                return $row[$resultKey];
+            }
+
             return null;
         }
 
-        $row = $result->current();
-
-        if ( empty( $row ) )
-        {
-            return null;
-        }
-
-        $resultKey = $functionCall->getResultKey();
-
-        if ( isset( $row[$resultKey] ) )
-        {
-            return $row[$resultKey];
-        }
-
-        return null;
+        throw new Exception\InvalidArgumentException( sprintf(
+            '%s: mode "%s" not suported',
+            __METHOD__,
+            $mode
+        ) );
     }
 
     /**

@@ -28,17 +28,25 @@ class FunctionCall extends AbstractSql
      *
      * @const
      */
-    const SPECIFICATION_CALL    = 'call';
-    const ARGUMENTS_MERGE       = 'merge';
-    const ARGUMENTS_SET         = 'set';
+    const MODE_SINGLE       = 'callSingle';
+    const MODE_RESULT_SET   = 'callResultSet';
+    const MODE_DEFAULT      = self::MODE_CALL_SINGLE;
+    const ARGUMENTS_MERGE   = 'merge';
+    const ARGUMENTS_SET     = 'set';
     /**#@-*/
 
     /**
      * @var array Specification array
      */
     protected $specifications = array(
-        self::SPECIFICATION_CALL => 'SELECT %1$s(%2$s) AS %3$s'
+        self::MODE_SINGLE       => 'SELECT %1$s(%2$s) AS %3$s',
+        self::MODE_RESULT_SET   => 'SELECT * FROM %1$s(%2$s)',
     );
+
+    /**
+     * @var string
+     */
+    protected $mode             = self::MODE_DEFAULT;
 
     /**
      * @var string
@@ -58,13 +66,25 @@ class FunctionCall extends AbstractSql
     /**
      * Constructor
      *
-     * @param  null|string|array $function
+     * @param  null|string|array    $function
+     * @param  null|array           $args
+     * @param  null|string          $mode
      */
-    public function __construct( $function = null )
+    public function __construct( $function = null, array $args = null, $mode = null )
     {
         if ( $function )
         {
             $this->name( $function );
+        }
+
+        if ( $args )
+        {
+            $this->arguments( $args );
+        }
+
+        if ( $mode )
+        {
+            $this->mode( $mode );
         }
     }
 
@@ -77,6 +97,18 @@ class FunctionCall extends AbstractSql
     public function name( $function )
     {
         $this->function = $function;
+        return $this;
+    }
+
+    /**
+     * Set mode
+     *
+     * @param  string $mode
+     * @return FunctionCall
+     */
+    public function mode( $mode = self::MODE_DEFAULT )
+    {
+        $this->mode = (string) $mode;
         return $this;
     }
 
@@ -103,6 +135,14 @@ class FunctionCall extends AbstractSql
     /**
      * @return string
      */
+    public function getMode()
+    {
+        return $this->mode;
+    }
+
+    /**
+     * @return string
+     */
     public function getResultKey()
     {
         return $this->resultKey;
@@ -120,9 +160,10 @@ class FunctionCall extends AbstractSql
     {
         if ( $values == null )
         {
-            throw new Exception\InvalidArgumentException(
-                'arguments() expects an array of values'
-            );
+            throw new Exception\InvalidArgumentException( sprintf(
+                '%s: arguments() expects an array of values',
+                __METHOD__
+            ) );
         }
 
         if ( $flag == self::ARGUMENTS_MERGE )
@@ -144,6 +185,7 @@ class FunctionCall extends AbstractSql
     public function getRawState( $key = null )
     {
         $rawState = array(
+            'mode'      => $this->mode,
             'name'      => $this->function,
             'function'  => $this->function,
             'arguments' => $this->arguments,
@@ -194,7 +236,7 @@ class FunctionCall extends AbstractSql
         }
 
         $sql = sprintf(
-            $this->specifications[self::SPECIFICATION_CALL],
+            $this->specifications[$this->mode],
             $function,
             implode( ', ', $arguments ),
             $resultKey
@@ -234,7 +276,7 @@ class FunctionCall extends AbstractSql
         }
 
         return sprintf(
-            $this->specifications[self::SPECIFICATION_INSERT],
+            $this->specifications[$this->mode],
             $function,
             implode( ', ', $arguments ),
             $resultKey
