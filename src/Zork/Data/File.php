@@ -24,6 +24,11 @@ class File implements Iterator,
     protected $pathname;
 
     /**
+     * @var string
+     */
+    protected $mimeType;
+
+    /**
      * @var resource
      */
     protected $handle;
@@ -44,7 +49,7 @@ class File implements Iterator,
      * @param   string|resource  $pathname
      * @throws  Exception\InvalidArgumentException
      */
-    public function __construct( $pathnameOrResource )
+    public function __construct( $pathnameOrResource, $mimeType = null )
     {
         if ( is_resource( $pathnameOrResource ) &&
              in_array( get_resource_type( $pathnameOrResource ),
@@ -64,6 +69,11 @@ class File implements Iterator,
                 $pathnameOrResource
             ) );
         }
+
+        if ( $mimeType )
+        {
+            $this->mimeType = (string) $mimeType;
+        }
     }
 
     /**
@@ -75,17 +85,28 @@ class File implements Iterator,
     public function getMimeType()
     {
         static $finfo;
-        $mime = null;
+
+        if ( $this->mimeType )
+        {
+            return $this->mimeType;
+        }
+
+        if ( ! $this->pathname )
+        {
+            return 'application/octet-stream';
+        }
+
+        $this->mimeType = null;
 
         // @codeCoverageIgnoreStart
         if ( function_exists( 'mime_content_type' ) &&
              ini_get( 'mime_magic.magicfile' ) )
         {
-            $mime = mime_content_type( $this->pathname );
+            $this->mimeType = mime_content_type( $this->pathname );
         }
         // @codeCoverageIgnoreEnd
 
-        if ( null === $mime &&
+        if ( null === $this->mimeType &&
              class_exists( 'finfo', false ) )
         {
             if ( null === $finfo )
@@ -99,11 +120,11 @@ class File implements Iterator,
 
             if ( ! empty( $finfo ) )
             {
-                $mime = finfo_file( $finfo, $this->pathname );
+                $this->mimeType = finfo_file( $finfo, $this->pathname );
             }
         }
 
-        return $mime;
+        return $this->mimeType;
     }
 
     /**
