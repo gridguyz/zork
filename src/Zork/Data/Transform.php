@@ -86,10 +86,7 @@ class Transform
 
         if ( $value instanceof \DateTime )
         {
-            return DateTime::createFromFormat(
-                DateTime::ISO8601,
-                $value->format( DateTime::ISO8601 )
-            );
+            return new DateTime( $value->format( \DateTime::ISO8601 ) );
         }
 
         if ( ! is_scalar( $value ) )
