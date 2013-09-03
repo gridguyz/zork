@@ -30,7 +30,7 @@ class FunctionCall extends AbstractSql
      */
     const MODE_SINGLE       = 'callSingle';
     const MODE_RESULT_SET   = 'callResultSet';
-    const MODE_DEFAULT      = self::MODE_CALL_SINGLE;
+    const MODE_DEFAULT      = self::MODE_SINGLE;
     const ARGUMENTS_MERGE   = 'merge';
     const ARGUMENTS_SET     = 'set';
     /**#@-*/
