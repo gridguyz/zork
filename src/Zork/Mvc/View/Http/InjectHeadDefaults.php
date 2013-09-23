@@ -5,9 +5,11 @@ namespace Zork\Mvc\View\Http;
 use Traversable;
 use Zend\View\ViewEvent;
 use Zend\Stdlib\ArrayUtils;
+use Zend\View\Helper\HeadScript;
 use Zend\View\Renderer\PhpRenderer;
 use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\AbstractListenerAggregate;
+use Zend\View\Helper\Placeholder\Container\AbstractContainer;
 
 /**
  * InjectHeadDefaults
