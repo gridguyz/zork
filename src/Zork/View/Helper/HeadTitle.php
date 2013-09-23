@@ -67,4 +67,27 @@ class HeadTitle extends ZendHeadTitle
         );
     }
 
+    /**
+     * Removes the elements designated by offset and length from the container,
+     * and replaces them with the elements of the replacement array, if supplied.
+     *
+     * @param   int     $offset
+     * @param   int     $length
+     * @param   arary   $replacement
+     * @return  \Zork\View\Helper\HeadTitle
+     */
+    public function splice( $offset, $length = null, $replacement = array() )
+    {
+        $container  = $this->getContainer();
+        $items      = $container->getArrayCopy();
+        $container->exchangeArray( array_splice(
+            $items,
+            $offset,
+            null === $length ? count( $items ) : (int) $length,
+            $replacement
+        ) );
+
+        return $this;
+    }
+
 }
