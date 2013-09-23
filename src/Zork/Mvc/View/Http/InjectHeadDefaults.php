@@ -20,6 +20,11 @@ class InjectHeadDefaults extends AbstractListenerAggregate
 {
 
     /**
+     * @const string
+     */
+    const DEFAULT_TITLE = ' ';
+
+    /**
      * @var array
      */
     protected $definitions;
@@ -128,15 +133,26 @@ class InjectHeadDefaults extends AbstractListenerAggregate
                 {
                     case 'headtitle':
 
+                        $contentSet = false;
+
                         if ( isset( $data['content'] ) )
                         {
                             foreach ( array_reverse( (array) $data['content'] )
                                       as $content )
                             {
-                                $plugin( $content, AbstractContainer::PREPEND );
+                                if ( $content )
+                                {
+                                    $contentSet = true;
+                                    $plugin( $content, AbstractContainer::PREPEND );
+                                }
                             }
 
                             unset( $data['content'] );
+                        }
+
+                        if ( ! $contentSet )
+                        {
+                            $plugin( static::DEFAULT_TITLE, AbstractContainer::PREPEND );
                         }
 
                         if ( isset( $data['separator'] ) )
