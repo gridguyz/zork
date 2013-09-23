@@ -1,6 +1,6 @@
 <?php
 
-namespace Grid\Core\Mvc\View\Http;
+namespace Zork\Mvc\View\Http;
 
 use Traversable;
 use Zend\View\ViewEvent;
