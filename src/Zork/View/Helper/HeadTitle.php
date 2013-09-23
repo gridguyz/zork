@@ -73,21 +73,22 @@ class HeadTitle extends ZendHeadTitle
      *
      * @param   int     $offset
      * @param   int     $length
-     * @param   arary   $replacement
-     * @return  \Zork\View\Helper\HeadTitle
+     * @param   array   $replacement
+     * @return  array
      */
     public function splice( $offset, $length = null, $replacement = array() )
     {
         $container  = $this->getContainer();
         $items      = $container->getArrayCopy();
-        $container->exchangeArray( array_splice(
+        $result     = array_splice(
             $items,
             $offset,
             null === $length ? count( $items ) : (int) $length,
             $replacement
-        ) );
+        );
 
-        return $this;
+        $container->exchangeArray( $items );
+        return $result;
     }
 
 }
