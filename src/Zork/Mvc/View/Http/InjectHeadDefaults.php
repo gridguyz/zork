@@ -35,8 +35,8 @@ class InjectHeadDefaults extends AbstractListenerAggregate
      * @var array
      */
     protected $appendableHeadMetaNames = array(
-        'keywords'      => array( '/[\s,;\.]+$/', '', ', '  ),
-        'description'   => array( '/[\s,;\.]+$/', '', '. ' ),
+        'keywords'      => array( '/[\s,;\.]+$/', '', ', ', ', ' ),
+        'description'   => array( '/[\s,;\.]+$/', '', '. ', ' ' ),
     );
 
     /**
@@ -202,12 +202,15 @@ class InjectHeadDefaults extends AbstractListenerAggregate
                                                         ->getArrayCopy();
                                     }
 
-                                    $content .= $this->appendableHeadMetaNames[$keyValue][2] .
+                                    $content .= rtrim(
+                                        $this->appendableHeadMetaNames[$keyValue][2] .
                                             preg_replace(
                                                 $this->appendableHeadMetaNames[$keyValue][0],
                                                 $this->appendableHeadMetaNames[$keyValue][1],
                                                 $this->getMetaByName( $metas, $keyValue )
-                                            );
+                                            ),
+                                        $this->appendableHeadMetaNames[$keyValue][3]
+                                    );
 
                                     $plugin->setName( $keyValue, $content, $spec );
                                 }
