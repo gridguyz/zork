@@ -71,6 +71,26 @@ class InjectHeadDefaults extends AbstractListenerAggregate
     }
 
     /**
+     * Get meta by name
+     *
+     * @param array $metas
+     * @param string $name
+     * @return string
+     */
+    protected function getMetaByName( array &$metas, $name )
+    {
+        foreach ( $metas as $item )
+        {
+            if ( $item->type == 'name' && $item->name == $name )
+            {
+                return $item->content;
+            }
+        }
+
+        return '';
+    }
+
+    /**
      * Inject default values for multiple view plugins
      *
      * @param   \Zend\View\ViewEvent    $event
