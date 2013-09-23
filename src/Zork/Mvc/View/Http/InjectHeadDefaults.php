@@ -25,6 +25,13 @@ class InjectHeadDefaults extends AbstractListenerAggregate
     protected $definitions;
 
     /**
+     * Already injected to this views
+     *
+     * @var array
+     */
+    protected $injected = array();
+
+    /**
      * @var array
      */
     protected $appendableHeadMetaNames = array(
@@ -57,9 +64,9 @@ class InjectHeadDefaults extends AbstractListenerAggregate
     public function attach( EventManagerInterface $events )
     {
         $this->listeners[] = $events->attach(
-            ViewEvent::EVENT_RESPONSE,
+            ViewEvent::EVENT_RENDERER_POST,
             array( $this, 'injectDefaults' ),
-            50
+            100
         );
     }
 
@@ -75,6 +82,15 @@ class InjectHeadDefaults extends AbstractListenerAggregate
 
         if ( $view instanceof PhpRenderer )
         {
+            $hash = spl_object_hash( $view );
+
+            if ( ! empty( $this->injected[$hash] ) )
+            {
+                return;
+            }
+
+            $this->injected[$hash] = true;
+
             foreach ( $this->definitions as $helper => $data )
             {
                 $plugin = $view->plugin( $helper );
