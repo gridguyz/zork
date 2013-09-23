@@ -170,6 +170,32 @@ class OpenGraph extends AbstractHelper
     );
 
     /**
+     * Safe locale aliases
+     *
+     * @var array
+     */
+    protected static $safeLocaleAliases = array(
+        'af' => 'af_ZA', 'ar' => 'ar_AR', 'az' => 'az_AZ', 'be' => 'be_BY',
+        'bg' => 'bg_BG', 'bn' => 'bn_IN', 'bs' => 'bs_BA', 'ca' => 'ca_ES',
+        'cs' => 'cs_CZ', 'cy' => 'cy_GB', 'da' => 'da_DK', 'de' => 'de_DE',
+        'el' => 'el_GR', 'en' => 'en_US', 'eo' => 'eo_EO', 'es' => 'es_ES',
+        'et' => 'et_EE', 'eu' => 'eu_ES', 'fa' => 'fa_IR', 'fi' => 'fi_FI',
+        'fo' => 'fo_FO', 'fr' => 'fr_FR', 'fy' => 'fy_NL', 'ga' => 'ga_IE',
+        'gl' => 'gl_ES', 'he' => 'he_IL', 'hi' => 'hi_IN', 'hr' => 'hr_HR',
+        'hu' => 'hu_HU', 'hy' => 'hy_AM', 'id' => 'id_ID', 'is' => 'is_IS',
+        'it' => 'it_IT', 'ja' => 'ja_JP', 'ka' => 'ka_GE', 'km' => 'km_KH',
+        'ko' => 'ko_KR', 'ku' => 'ku_TR', 'la' => 'la_VA', 'lt' => 'lt_LT',
+        'lv' => 'lv_LV', 'mk' => 'mk_MK', 'ml' => 'ml_IN', 'ms' => 'ms_MY',
+        'nb' => 'nb_NO', 'ne' => 'ne_NP', 'nl' => 'nl_NL', 'nn' => 'nn_NO',
+        'no' => 'nn_NO', 'pa' => 'pa_IN', 'pl' => 'pl_PL', 'ps' => 'ps_AF',
+        'pt' => 'pt_PT', 'ro' => 'ro_RO', 'ru' => 'ru_RU', 'sk' => 'sk_SK',
+        'sl' => 'sl_SI', 'sq' => 'sq_AL', 'sr' => 'sr_RS', 'sv' => 'sv_SE',
+        'sw' => 'sw_KE', 'ta' => 'ta_IN', 'te' => 'te_IN', 'th' => 'th_TH',
+        'tl' => 'tl_PH', 'tr' => 'tr_TR', 'uk' => 'uk_UA', 'vi' => 'vi_VN',
+        'zh' => 'zh_CN',
+    );
+
+    /**
      * Retrieve the HeadMeta helper
      *
      * @return \Zend\View\Helper\HeadMeta
@@ -607,6 +633,25 @@ class OpenGraph extends AbstractHelper
         }
 
         return implode( ' ', $attribute );
+    }
+
+    /**
+     * Get safe locale
+     *
+     * @staticvar   array   $localeAliases
+     * @param       string  $locale
+     * @return      string
+     */
+    public function getSafeLocale( $locale )
+    {
+        $locale = (string) $locale;
+
+        if ( ! empty( static::$safeLocaleAliases[$locale] ) )
+        {
+            $locale = static::$safeLocaleAliases[$locale];
+        }
+
+        return $locale;
     }
 
 }

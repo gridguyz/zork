@@ -1,21 +1,20 @@
 <?php
 
-namespace Zork\View\Helper;
+namespace Grid\Core\Mvc\View\Http;
 
+use Traversable;
+use Zend\View\ViewEvent;
 use Zend\Stdlib\ArrayUtils;
-use Zend\View\Helper\HeadScript;
-use Zend\View\Helper\AbstractHelper;
-use Zend\View\Renderer\RendererInterface;
-use Zend\View\Helper\Placeholder\Container\AbstractContainer;
+use Zend\View\Renderer\PhpRenderer;
+use Zend\EventManager\EventManagerInterface;
+use Zend\EventManager\AbstractListenerAggregate;
 
 /**
- * HeadDefaults
+ * InjectHeadDefaults
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
- * @deprecated in favour of \Grid\Core\Mvc\View\Http\InjectHeadDefaults
- * @see \Grid\Core\Mvc\View\Http\InjectHeadDefaults
  */
-class HeadDefaults extends AbstractHelper
+class InjectHeadDefaults extends AbstractListenerAggregate
 {
 
     /**
@@ -32,50 +31,57 @@ class HeadDefaults extends AbstractHelper
     );
 
     /**
-     * @param array $definitions
+     * Constructor
+     *
+     * @param   array   $definitions
      */
-    public function __construct( array $definitions = array() )
+    public function __construct( $definitions = array() )
     {
+        if ( $definitions instanceof Traversable )
+        {
+            $definitions = ArrayUtils::iteratorToArray( $definitions );
+        }
+        else
+        {
+            $definitions = (array) $definitions;
+        }
+
         $this->definitions = $definitions;
     }
 
     /**
-     * Get meta by name
-     *
-     * @param array $metas
-     * @param string $name
-     * @return string
+     * {@inheritDoc}
      */
-    protected function getMetaByName( array &$metas, $name )
+    public function attach( EventManagerInterface $events )
     {
-        foreach ( $metas as $item )
-        {
-            if ( $item->type == 'name' && $item->name == $name )
-            {
-                return $item->content;
-            }
-        }
-
-        return '';
+        $this->listeners[] = $events->attach(
+            ViewEvent::EVENT_RESPONSE,
+            array( $this, 'injectDefaults' ),
+            50
+        );
     }
 
     /**
-     * Set the View object
+     * Inject default values for multiple view plugins
      *
-     * @param  Renderer $view
-     * @return HeadDefaults
+     * @param   \Zend\View\ViewEvent    $event
+     * @return  void
      */
-    public function setView( RendererInterface $view )
+    public function injectDefaults( ViewEvent $event )
     {
-        parent::setView( $view );
+        $view = $event->getRenderer();
 
-        if ( method_exists( $view, 'plugin' ) )
+        if ( $view instanceof PhpRenderer )
         {
             foreach ( $this->definitions as $helper => $data )
             {
                 $plugin = $view->plugin( $helper );
 
-                if ( ! is_array( $data ) )
+                if ( $data instanceof Traversable )
+                {
+                    $data = ArrayUtils::iteratorToArray( $data );
+                }
+                else
                 {
                     $data = (array) $data;
                 }
@@ -281,36 +287,6 @@ class HeadDefaults extends AbstractHelper
                 }
             }
         }
-
-        return $this;
-    }
-
-    /**
-     * Factory method
-     *
-     * @param array|\Traversable $options
-     * @throws \InvalidArgumentException
-     * @codeCoverageIgnore
-     */
-    public static function factory( $options )
-    {
-        if ( $options instanceof \Traversable )
-        {
-            $options = ArrayUtils::iteratorToArray( $options );
-        }
-        elseif ( ! is_array( $options ) )
-        {
-            throw new Exception\InvalidArgumentException( sprintf(
-                '%s expects an array or Traversable object; received "%s"',
-                __METHOD__, (
-                    is_object( $options )
-                        ? get_class( $options )
-                        : gettype( $options )
-                )
-            ) );
-        }
-
-        return new static( $options );
     }
 
 }
