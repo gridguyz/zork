@@ -90,6 +90,11 @@ class ForbiddenStrategy implements ListenerAggregateInterface
      */
     public function prepareForbiddenViewModel( MvcEvent $event )
     {
+        if ($event->getRequest() instanceof \Zend\Console\Request) {
+            // CLI mode
+            return;
+        }
+        
         $vars = $event->getResult();
         if ( $vars instanceof Response )
         {
