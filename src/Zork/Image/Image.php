@@ -891,7 +891,7 @@ class Image
      * @return \Zork\Image\Image
      * @throws \Zork\Image\Exception\ResizeException
      */
-    public function resize( $width, $height, $name = self::RESIZE_DEFAULT )
+    public function resize( $width, $height, $name = self::RESIZE_DEFAULT, $bgColor = null )
     {
         $method = array( $this, 'resize' . ucfirst( $name ) );
 
@@ -909,13 +909,14 @@ class Image
             );
         }
 
+        if ( empty( $bgColor ) || Color::create( $bgColor )->isTransparent() )
+        {
+            $bgColor = $this->getTransparent();
+        }
+
         $width  = (int) $width;
         $height = (int) $height;
-        $args   = func_get_args();
-        array_splice( $args, 0, 3 );
-        array_unshift( $args, $height );
-        array_unshift( $args, $width );
-        return call_user_func_array( $method, $args );
+        return call_user_func( $method, $width, $height, $bgColor );
     }
 
     /**
@@ -976,12 +977,12 @@ class Image
      * @return \Zork\Image\Image
      * @throws \Zork\Image\Exception\ResizeException
      */
-    public function resizeStretch( $width, $height )
+    public function resizeStretch( $width, $height, $bgColor = null )
     {
         $newResource = static::createResource(
             $width, $height,
             $this->isTrueColor(),
-            $this->getTransparent()
+            $bgColor
         );
 
         $this->innerResize(
@@ -1007,7 +1008,7 @@ class Image
      * @return \Zork\Image\Image
      * @throws \Zork\Image\Exception\ResizeException
      */
-    public function resizeFit( $width, $height )
+    public function resizeFit( $width, $height, $bgColor = null )
     {
         $inputWidth  = $this->getWidth();
         $inputHeight = $this->getHeight();
@@ -1032,7 +1033,7 @@ class Image
             $newResource = static::createResource(
                 $newWidth, $newHeight,
                 $this->isTrueColor(),
-                $this->getTransparent()
+                $bgColor
             );
 
             $this->innerResize(
@@ -1066,9 +1067,7 @@ class Image
         $newResource = static::createResource(
             $width, $height,
             $this->isTrueColor(),
-            empty( $bgColor ) || Color::create( $bgColor )->isTransparent()
-                ? $this->getTransparent()
-                : $bgColor
+            $bgColor
         );
 
         if ( $inputWidth <= $width && $inputHeight <= $height )
