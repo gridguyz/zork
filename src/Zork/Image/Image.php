@@ -729,7 +729,7 @@ class Image
     }
 
     /**
-     * Gte transparent color
+     * Get transparent color
      *
      * @return \Zork\Image\Color
      */
@@ -911,8 +911,11 @@ class Image
 
         $width  = (int) $width;
         $height = (int) $height;
-
-        return call_user_func( $method, $width, $height );
+        $args   = func_get_args();
+        array_splice( $args, 0, 3 );
+        array_unshift( $args, $height );
+        array_unshift( $args, $width );
+        return call_user_func_array( $method, $args );
     }
 
     /**
@@ -1056,14 +1059,16 @@ class Image
      * @return \Zork\Image\Image
      * @throws \Zork\Image\Exception\ResizeException
      */
-    public function resizeFrame( $width, $height )
+    public function resizeFrame( $width, $height, $bgColor = null )
     {
         $inputWidth  = $this->getWidth();
         $inputHeight = $this->getHeight();
         $newResource = static::createResource(
             $width, $height,
             $this->isTrueColor(),
-            $this->getTransparent()
+            empty( $bgColor ) || Color::create( $bgColor )->isTransparent()
+                ? $this->getTransparent()
+                : $bgColor
         );
 
         if ( $inputWidth <= $width && $inputHeight <= $height )
