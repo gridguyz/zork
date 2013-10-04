@@ -13,7 +13,7 @@ class PathSelect extends Text
     /**
      * @var string
      */
-    const DEFAULT_BUTTON = 'default.select';
+    const DEFAULT_BUTTON = 'default.browse';
 
     /**
      * Seed attributes
@@ -33,18 +33,32 @@ class PathSelect extends Text
     protected $directory;
 
     /**
-     * Button label
+     * File flag
      *
-     * @var string
+     * @var bool
      */
-    protected $button;
+    protected $file = true;
 
     /**
      * File flag
      *
      * @var bool
      */
-    protected $file = true;
+    protected $click = true;
+
+    /**
+     * Button flag
+     *
+     * @var bool
+     */
+    protected $button = true;
+
+    /**
+     * Button text
+     *
+     * @var string
+     */
+    protected $buttonText = self::DEFAULT_BUTTON;
 
     /**
      * Get starting directory
@@ -57,16 +71,6 @@ class PathSelect extends Text
     }
 
     /**
-     * Get button label
-     *
-     * @return string|null
-     */
-    public function getButton()
-    {
-        return $this->button;
-    }
-
-    /**
      * Get file flag
      *
      * @return bool
@@ -74,6 +78,26 @@ class PathSelect extends Text
     public function getFile()
     {
         return $this->file;
+    }
+
+    /**
+     * Get button flag
+     *
+     * @return bool
+     */
+    public function getButton()
+    {
+        return $this->button;
+    }
+
+    /**
+     * Get button text
+     *
+     * @return string
+     */
+    public function getButtonText()
+    {
+        return $this->buttonText;
     }
 
     /**
@@ -91,20 +115,6 @@ class PathSelect extends Text
     }
 
     /**
-     * Set button label
-     *
-     * @param string $button
-     * @return \Zork\Form\Element\PathSelect
-     */
-    public function setButton( $button = self::DEFAULT_BUTTON )
-    {
-        return $this->setAttribute(
-            'data-js-pathselect-button',
-            $this->button = ( (string) $button ) ?: null
-        );
-    }
-
-    /**
      * Set file flag
      *
      * @param bool $flag
@@ -117,6 +127,54 @@ class PathSelect extends Text
             $this->file = true;
 
             return $this->setAttribute(
+                'data-js-pathselect-file',
+                null
+            );
+        }
+
+        return $this->setAttribute(
+            'data-js-pathselect-file',
+            ( $this->file = (bool) $flag ) ? 'true' : 'false'
+        );
+    }
+
+    /**
+     * Set file flag
+     *
+     * @param bool $flag
+     * @return \Zork\Form\Element\PathSelect
+     */
+    public function setClick( $flag )
+    {
+        if ( null === $flag )
+        {
+            $this->click = true;
+
+            return $this->setAttribute(
+                'data-js-pathselect-click',
+                null
+            );
+        }
+
+        return $this->setAttribute(
+            'data-js-pathselect-click',
+            ( $this->click = (bool) $flag ) ? 'true' : 'false'
+        );
+    }
+
+    /**
+     * Set file flag
+     *
+     * @param bool $flag
+     * @return \Zork\Form\Element\PathSelect
+     */
+    public function setButton( $flag )
+    {
+        if ( null === $flag )
+        {
+            $this->button = true;
+
+            return $this->setAttribute(
                 'data-js-pathselect-button',
                 null
             );
@@ -124,7 +182,21 @@ class PathSelect extends Text
 
         return $this->setAttribute(
             'data-js-pathselect-button',
-            ( $this->file = (bool) $flag ) ? 'true' : 'false'
+            ( $this->button = (bool) $flag ) ? 'true' : 'false'
+        );
+    }
+
+    /**
+     * Set button text
+     *
+     * @param string $buttonText
+     * @return \Zork\Form\Element\PathSelect
+     */
+    public function setButtonText( $buttonText = self::DEFAULT_BUTTON )
+    {
+        return $this->setAttribute(
+            'data-js-pathselect-button-text',
+            $this->buttonText = ( (string) $buttonText ) ?: null
         );
     }
 
@@ -149,14 +221,24 @@ class PathSelect extends Text
             $this->setDirectory( $this->options['pathselect_directory'] );
         }
 
+        if ( isset( $this->options['pathselect_file'] ) )
+        {
+            $this->setFile( $this->options['pathselect_file'] );
+        }
+
+        if ( isset( $this->options['pathselect_click'] ) )
+        {
+            $this->setClick( $this->options['pathselect_click'] );
+        }
+
         if ( isset( $this->options['pathselect_button'] ) )
         {
             $this->setButton( $this->options['pathselect_button'] );
         }
 
-        if ( isset( $this->options['pathselect_file'] ) )
+        if ( isset( $this->options['pathselect_buttontext'] ) )
         {
-            $this->setFile( $this->options['pathselect_file'] );
+            $this->setButtonText( $this->options['pathselect_buttontext'] );
         }
     }
 
