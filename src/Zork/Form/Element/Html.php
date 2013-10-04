@@ -77,7 +77,7 @@ class Html extends Textarea
     {
         return $this->setAttribute(
             'html-button-set',
-            $this->theme = ( (string) $set ) ?: null
+            $this->buttonSet = ( (string) $set ) ?: null
         );
     }
 
