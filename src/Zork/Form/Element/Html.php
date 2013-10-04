@@ -76,7 +76,7 @@ class Html extends Textarea
     public function setButtonSet( $set )
     {
         return $this->setAttribute(
-            'html-button-set',
+            'data-js-html-button-set',
             $this->buttonSet = ( (string) $set ) ?: null
         );
     }
