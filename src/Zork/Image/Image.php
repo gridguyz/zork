@@ -61,7 +61,7 @@ class Image
     /**
      * Text default size (ttf)
      */
-    const DEFAULT_TEXT_SIZE  = 12;
+    const DEFAULT_TEXT_SIZE     = 12;
 
     /**
      * Png no filter
@@ -1022,11 +1022,11 @@ class Image
             if ( $inputWidth / $inputHeight > $width / $height )
             {
                 $newWidth   = $width;
-                $newHeight  = (int) ( $width * $inputHeight / $inputWidth );
+                $newHeight  = max( 1, (int) round( $width * $inputHeight / $inputWidth ) );
             }
             else
             {
-                $newWidth   = (int) ( $height * $inputWidth / $inputHeight );
+                $newWidth   = max( 1, (int) round( $height * $inputWidth / $inputHeight ) );
                 $newHeight  = $height;
             }
 
@@ -1074,23 +1074,23 @@ class Image
         {
             $newWidth   = $inputWidth;
             $newHeight  = $inputHeight;
-            $newX       = (int) ( ( $width  - $newWidth  ) / 2 );
-            $newY       = (int) ( ( $height - $newHeight ) / 2 );
+            $newX       = (int) round( ( $width  - $newWidth  ) / 2 );
+            $newY       = (int) round( ( $height - $newHeight ) / 2 );
         }
         else
         {
             if ( $inputWidth / $inputHeight > $width / $height )
             {
                 $newWidth   = $width;
-                $newHeight  = (int) ( $width * $inputHeight / $inputWidth );
+                $newHeight  = max( 1, (int) round( $width * $inputHeight / $inputWidth ) );
                 $newX       = 0;
-                $newY       = (int) ( ( $height - $newHeight ) / 2 );
+                $newY       = (int) round( ( $height - $newHeight ) / 2 );
             }
             else
             {
-                $newWidth   = (int) ( $height * $inputWidth / $inputHeight );
+                $newWidth   = max( 1, (int) round( $height * $inputWidth / $inputHeight ) );
                 $newHeight  = $height;
-                $newX       = (int) ( ( $width - $newWidth ) / 2 );
+                $newX       = (int) round( ( $width - $newWidth ) / 2 );
                 $newY       = 0;
             }
         }
@@ -1131,17 +1131,17 @@ class Image
 
         if ( $inputWidth / $inputHeight < $width / $height )
         {
-            $newWidth = $inputWidth;
-            $newHeight = (int) ( ( $inputWidth / $width ) * $height );
-            $newX = 0;
-            $newY = (int) ( ( $inputHeight - $newHeight ) / 2 );
+            $newWidth   = $inputWidth;
+            $newHeight  = max( 1, (int) round( ( $inputWidth / $width ) * $height ) );
+            $newX       = 0;
+            $newY       = (int) round( ( $inputHeight - $newHeight ) / 2 );
         }
         else
         {
-            $newWidth = (int) ( ( $inputHeight / $height ) * $width );
-            $newHeight = $inputHeight;
-            $newX = (int) ( ( $inputWidth - $newWidth ) / 2 );
-            $newY = 0;
+            $newWidth   = max( 1, (int) round( ( $inputHeight / $height ) * $width ) );
+            $newHeight  = $inputHeight;
+            $newX       = (int) round( ( $inputWidth - $newWidth ) / 2 );
+            $newY       = 0;
         }
 
         $this->innerResize(
