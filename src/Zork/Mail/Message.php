@@ -20,14 +20,14 @@ class Message extends ZendMessage
      *
      * @var string
      */
-    const DEFAULT_ENCODING  = 'UTF-8';
+    const DEFAULT_ENCODING = 'UTF-8';
 
     /**
      * Default user-agent for send()
      *
      * @var string
      */
-    const USER_AGENT        = 'Zork_Mail/1.0';
+    const USER_AGENT = 'Zork_Mail/1.1';
 
     /**
      * Message encoding
@@ -36,91 +36,169 @@ class Message extends ZendMessage
      *
      * @var string
      */
-    protected $encoding     = self::DEFAULT_ENCODING;
+    protected $encoding = self::DEFAULT_ENCODING;
 
     /**
      * Set the message body
      *
-     * @param  null|string|\Zend\Mime\Message|\Traversable|object|array $body
-     * @param  bool $generateText default: true
-     * @throws \Zend\Mail\Exception\InvalidArgumentException
-     * @return \Zork\Mail\Message
+     * @param   null|string|\Zend\Mime\Message|\Traversable|array   $body
+     * @param   bool                                                $generateText
+     * @param   bool                                                $alternative
+     * @throws  \Zend\Mail\Exception\InvalidArgumentException
+     * @return  \Zork\Mail\Message
      */
-    public function setBody( $body, $generateText = true )
+    public function setBody( $body, $generateText = true, $alternative = true )
     {
+        static $mimeAliases = array(
+            'text'          => Mime\Mime::TYPE_TEXT,
+            'html'          => Mime\Mime::TYPE_HTML,
+            'alternative'   => Mime\Mime::MULTIPART_ALTERNATIVE,
+            'mixed'         => Mime\Mime::MULTIPART_MIXED,
+            'related'       => Mime\Mime::MULTIPART_RELATED,
+        );
+
         if ( $body !== null )
         {
-            if ( is_string( $body ) )
+            if ( is_scalar( $body ) )
             {
                 $body = array(
-                    'text/html' => $body,
+                    'text/html' => (string) $body,
                 );
             }
 
-            if ( is_array( $body ) ||
-                 $body instanceof \stdClass ||
-                 $body instanceof \Traversable )
+            if ( ! $body instanceof Mime\Message )
             {
                 $message = new Mime\Message;
 
-                foreach ( $body as $type => $content )
+                if ( $body instanceof Mime\Part )
                 {
-                    $part = new Mime\Part( $content );
-                    $part->type     = $type;
-                    $part->charset  = $this->getEncoding();
-                    $message->addPart( $part );
+                    if ( empty( $body->charset ) )
+                    {
+                        $body->charset = $this->getEncoding();
+                    }
+
+                    $message->addPart( $body );
+                }
+                else
+                {
+                    foreach ( $body as $type => $content )
+                    {
+                        if ( isset( $mimeAliases[$type] ) )
+                        {
+                            $type = $mimeAliases[$type];
+                        }
+
+                        if ( $content instanceof Mime\Message )
+                        {
+                            /* @var $content \Zend\Mime\Message */
+                            if ( $content->isMultiPart() )
+                            {
+                                $mime = $content->getMime();
+                                $part = new Mime\Part(
+                                    $content->generateMessage( Headers::EOL )
+                                );
+
+                                if ( ! preg_match( '#^multipart/#', $type ) )
+                                {
+                                    $type = Mime\Mime::MULTIPART_MIXED;
+                                }
+
+                                $part->type     = $type;
+                                $part->boundary = $mime->boundary();
+                            }
+                            else
+                            {
+                                $parts  = $content->getParts();
+                                $part   = reset( $parts );
+                            }
+                        }
+                        else if ( $content instanceof Mime\Part )
+                        {
+                            /* @var $content \Zend\Mime\Part */
+                            $part = $content;
+                        }
+                        else
+                        {
+                            $part = new Mime\Part( $content );
+                            $part->type     = $type;
+                            $part->charset  = $this->getEncoding();
+                        }
+
+                        if ( empty( $part->type ) )
+                        {
+                            $part->type = $type;
+                        }
+
+                        if ( empty( $part->charset ) )
+                        {
+                            $part->charset = $this->getEncoding();
+                        }
+
+                        $message->addPart( $part );
+                    }
                 }
 
                 $body = $message;
             }
 
-            if ( $body instanceof Mime\Message )
+            /* @var $body \Zend\Mime\Message */
+            $partHtml   = null;
+            $partText   = null;
+            $parts      = $body->getParts();
+
+            foreach ( $parts as $part )
             {
-                $partHtml = null;
-                $partText = null;
-
-                foreach ( $body->getParts() as $part )
+                /* @var $part \Zend\Mime\Part */
+                switch ( $part->type )
                 {
-                    /* @var $part \Zend\Mime\Part */
-                    switch ( $part->type )
-                    {
-                        case Mime\Mime::TYPE_HTML:
-                            $partHtml = $part;
-                            break;
+                    case Mime\Mime::TYPE_HTML:
+                        $partHtml = $part;
+                        break;
 
-                        case Mime\Mime::TYPE_TEXT:
-                            $partText = $part;
-                            break;
-                    }
+                    case Mime\Mime::TYPE_TEXT:
+                        $partText = $part;
+                        break;
                 }
+            }
 
-                if ( $generateText && empty( $partText ) && ! empty( $partHtml ) )
-                {
-                    $partText = new Mime\Part( String::stripHtml(
-                        $partHtml->getContent( Headers::EOL ),
-                        $this->getEncoding()
-                    ) );
+            if ( $generateText && empty( $partText ) && ! empty( $partHtml ) )
+            {
+                $partText = new Mime\Part( String::stripHtml(
+                    $partHtml->getContent( Headers::EOL ),
+                    $this->getEncoding()
+                ) );
 
-                    $partText->type     = Mime\Mime::TYPE_TEXT;
-                    $partText->charset  = $this->getEncoding();
-                    $body->addPart( $partText );
-                }
+                $partText->type     = Mime\Mime::TYPE_TEXT;
+                $partText->charset  = $this->getEncoding();
+                array_unshift( $parts, $partText );
+                $body->setParts( $parts );
             }
         }
 
-        return parent::setBody( $body );
+        parent::setBody( $body );
+
+        if ( $alternative &&
+             $body instanceof Mime\Message &&
+             $body->isMultiPart() )
+        {
+            $this->getHeaderByName( 'content-type', 'Zend\Mail\Header\ContentType' )
+                 ->setType( Mime\Mime::MULTIPART_ALTERNATIVE )
+                 ->addParameter( 'boundary', $body->getMime()->boundary() );
+        }
+
+        return $this;
     }
 
     /**
      * Compose headers
      *
-     * @param  \Zend\Mail\Headers $headers
-     * @return \Zork\Mail\Message
+     * @param   \Zend\Mail\Headers  $headers
+     * @return  \Zork\Mail\Message
      */
     public function setHeaders( Headers $headers )
     {
-        $headers->addHeaderLine( 'User-Agent', static::USER_AGENT )
-                ->addHeaderLine( 'X-Mailer', static::USER_AGENT );
+        $headers->addHeaderLine( 'User-Agent',  static::USER_AGENT )
+                ->addHeaderLine( 'X-Mailer',    static::USER_AGENT );
 
         return parent::setHeaders( $headers );
     }
