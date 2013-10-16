@@ -15,6 +15,39 @@ trait FileTrait
     use SiteInfoAwareTrait;
 
     /**
+     * Validate file
+     *
+     * @param   string  $file
+     * @return  string|null
+     */
+    protected function validateFile( $file )
+    {
+        if ( empty( $file ) )
+        {
+            return null;
+        }
+
+        $file = preg_replace(
+            '#(^|/)\\.+(/|$)#s',
+            '/',
+            str_replace( '\\', '/', $file )
+        );
+
+        if ( empty( $file ) )
+        {
+            return null;
+        }
+
+        if ( preg_match( '#^/(uploads|tmp)/#', $file ) &&
+             is_file( './public' . $file ) )
+        {
+            return $file;
+        }
+
+        return null;
+    }
+
+    /**
      * Remove file form uploads
      *
      * @param string $file
@@ -22,9 +55,7 @@ trait FileTrait
      */
     protected function removeFile( $file )
     {
-        if ( ! empty( $file ) &&
-             preg_match( '#^/(uploads|tmp)/#', $file ) &&
-             is_file( './public' . $file ) )
+        if ( $this->validateFile( $file ) )
         {
             @ unlink( './public' . $file );
         }
@@ -42,6 +73,8 @@ trait FileTrait
      */
     protected function addFile( $file, $dest )
     {
+        $file = $this->validateFile( $file );
+
         if ( empty( $file ) )
         {
             return null;
