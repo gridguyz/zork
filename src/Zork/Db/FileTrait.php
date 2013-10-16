@@ -55,7 +55,9 @@ trait FileTrait
      */
     protected function removeFile( $file )
     {
-        if ( $this->validateFile( $file ) )
+        $file = $this->validateFile( $file );
+
+        if ( ! empty( $file ) )
         {
             @ unlink( './public' . $file );
         }
