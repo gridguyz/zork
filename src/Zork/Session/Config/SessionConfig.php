@@ -9,12 +9,12 @@
 
 namespace Zork\Session\Config;
 
-use Zend\Session\Config\StandardConfig as ZendStandardConfig;
+use Zend\Session\Config\SessionConfig as ZendSessionConfig;
 
 /**
- * Standard session configuration
+ * Session configuration
  */
-class StandardConfig extends ZendStandardConfig
+class SessionConfig extends ZendSessionConfig
 {
 
     /**
@@ -26,8 +26,8 @@ class StandardConfig extends ZendStandardConfig
 
         if ( empty( $cookieDomain ) )
         {
-            $this->cookieDomain = null;
-            $this->setStorageOption( 'cookie_domain', null );
+            $this->cookieDomain = '';
+            $this->setStorageOption( 'cookie_domain', '' );
         }
         else
         {
