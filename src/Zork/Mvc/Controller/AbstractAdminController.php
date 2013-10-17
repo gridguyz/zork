@@ -308,7 +308,8 @@ abstract class AbstractAdminController extends AbstractActionController
     {
         if ( null === $this->authenticationService )
         {
-            $this->authenticationService = new AuthenticationService();
+            $this->authenticationService = $this->getServiceLocator()
+                                                ->get( 'Zend\Authentication\AuthenticationService' );
         }
 
         return $this->authenticationService;

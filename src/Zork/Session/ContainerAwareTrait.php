@@ -4,13 +4,13 @@ namespace Zork\Session;
 
 use Zend\Session\Container;
 use Zend\Session\ManagerInterface;
-use Zend\Session\SessionManager;
+use Zend\ServiceManager\ServiceLocatorAwareInterface;
 
 /**
  * SessionAwareTrait
  *
- * expects only a <code>getServiceLocator()</code>
- * method to be on <code>$this</code>
+ * Classes should implement
+ * <code>Zend\ServiceManager\ServiceLocatorAwareInterface</code>
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
  */
@@ -18,20 +18,20 @@ trait ContainerAwareTrait
 {
 
     /**
-     * @var \Zend\Session\ManagerInterface
+     * @var ManagerInterface
      */
     protected $sessionManager;
 
     /**
-     * @var \Zend\Session\Container[]
+     * @var Container[]
      */
     protected $sessionContainers = array();
 
     /**
      * Set the session manager
      *
-     * @param  \Zend\Session\ManagerInterface $manager
-     * @return \Zork\Mvc\Controller\Plugin\Messenger
+     * @param   ManagerInterface    $manager
+     * @return  ContainerAwareTrait
      */
     public function setSessionManager( ManagerInterface $manager )
     {
@@ -49,13 +49,17 @@ trait ContainerAwareTrait
      *
      * If none composed, lazy-loads a SessionManager instance
      *
-     * @return \Zend\Session\ManagerInterface
+     * @return  ManagerInterface
      */
     public function getSessionManager()
     {
-        if ( ! $this->sessionManager instanceof ManagerInterface )
+        if ( ! $this->sessionManager instanceof ManagerInterface &&
+               $this instanceof ServiceLocatorAwareInterface )
         {
-            $this->setSessionManager( new SessionManager() );
+            $this->setSessionManager(
+                $this->getServiceLocator()
+                     ->get( 'Zend\Session\ManagerInterface' )
+            );
         }
 
         return $this->sessionManager;
@@ -64,7 +68,7 @@ trait ContainerAwareTrait
     /**
      * Get a session container
      *
-     * @return \Zend\Session\Container
+     * @return  Container
      */
     protected function getSessionContainer( $name = null )
     {

@@ -5,6 +5,7 @@ namespace Zork\Mvc;
 use Locale as IntlLocale;
 use Zend\View\Helper\AbstractHelper;
 use Zend\Session\Container as SessionContainer;
+use Zend\Session\ManagerInterface as SessionManager;
 
 /**
  * Locale
@@ -43,8 +44,13 @@ class AdminLocale extends AbstractHelper
      *
      * @param string $current
      */
-    public function __construct( $current )
+    public function __construct( $current, SessionManager $sessionManager )
     {
+        $this->sessionContainer = new SessionContainer(
+            static::SESSION_CONTAINER,
+            $sessionManager
+        );
+
         $this->setCurrent( $current );
     }
 
@@ -81,11 +87,6 @@ class AdminLocale extends AbstractHelper
      */
     public function getSessionContainer()
     {
-        if ( null === $this->sessionContainer )
-        {
-            $this->sessionContainer = new SessionContainer( static::SESSION_CONTAINER );
-        }
-
         return $this->sessionContainer;
     }
 

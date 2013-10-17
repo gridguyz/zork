@@ -23,8 +23,9 @@ class AdminLocaleServiceFactory implements FactoryInterface
     {
         // Configure the admin-locale
         $request = $serviceLocator->get( 'Request' );
+        $manager = $serviceLocator->get( 'Zend\Session\ManagerInterface' );
         $locale  = $request->getQuery( AdminLocale::SESSION_KEY, null );
-        return new AdminLocale( $locale );
+        return new AdminLocale( $locale, $manager );
     }
 
 }
