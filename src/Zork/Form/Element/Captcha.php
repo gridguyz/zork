@@ -2,10 +2,13 @@
 
 namespace Zork\Form\Element;
 
+use Zend\Captcha\AbstractWord;
+use Zend\Captcha\AdapterInterface;
 use Zend\Form\Element\Captcha as ElementBase;
 use Zend\InputFilter\InputProviderInterface;
 use Zork\Form\TranslatorSettingsAwareInterface;
-use Zend\Captcha\AdapterInterface as CaptchaAdapterInterface;
+use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Zend\ServiceManager\ServiceLocatorAwareInterface;
 
 /**
  * Element
@@ -14,10 +17,12 @@ use Zend\Captcha\AdapterInterface as CaptchaAdapterInterface;
  */
 class Captcha extends ElementBase
            implements InputProviderInterface,
+                      ServiceLocatorAwareInterface,
                       TranslatorSettingsAwareInterface
 {
 
-    use InputProviderTrait;
+    use InputProviderTrait,
+        ServiceLocatorAwareTrait;
 
     protected $attributes = array(
         'type' => 'captcha',
@@ -57,7 +62,7 @@ class Captcha extends ElementBase
     {
         if ( null === $this->captcha )
         {
-            if ( $this->defaultCaptcha instanceof CaptchaAdapterInterface )
+            if ( $this->defaultCaptcha instanceof AdapterInterface )
             {
                 $captcha = clone $this->defaultCaptcha;
             }
@@ -67,6 +72,18 @@ class Captcha extends ElementBase
             }
 
             $this->setCaptcha( $captcha );
+
+            $captchaObject  = $this->getCaptcha();
+            $serviceManager = $this->getServiceManager();
+
+            if ( $captchaObject instanceof AbstractWord && $serviceManager &&
+                 $serviceManager->has( 'Zend\Session\ManagerInterface' ) )
+            {
+                $captchaObject->getSession()
+                              ->setManager( $serviceManager->get(
+                                    'Zend\Session\ManagerInterface'
+                                ) );
+            }
         }
 
         return parent::getCaptcha();
