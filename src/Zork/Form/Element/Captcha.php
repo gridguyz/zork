@@ -74,13 +74,13 @@ class Captcha extends ElementBase
             $this->setCaptcha( $captcha );
 
             $captchaObject  = $this->getCaptcha();
-            $serviceManager = $this->getServiceManager();
+            $serviceLocator = $this->getServiceLocator();
 
-            if ( $captchaObject instanceof AbstractWord && $serviceManager &&
-                 $serviceManager->has( 'Zend\Session\ManagerInterface' ) )
+            if ( $captchaObject instanceof AbstractWord && $serviceLocator &&
+                 $serviceLocator->has( 'Zend\Session\ManagerInterface' ) )
             {
                 $captchaObject->getSession()
-                              ->setManager( $serviceManager->get(
+                              ->setManager( $serviceLocator->get(
                                     'Zend\Session\ManagerInterface'
                                 ) );
             }
