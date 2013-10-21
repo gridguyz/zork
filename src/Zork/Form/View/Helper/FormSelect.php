@@ -113,4 +113,28 @@ class FormSelect extends ZendFormSelect
         return implode( "\n", $optionStrings );
     }
 
+    /**
+     * Ensure that the value is set appropriately
+     *
+     * If the element's value attribute is an array, but there is no multiple
+     * attribute, or that attribute does not evaluate to true, then we have
+     * a domain issue -- you cannot have multiple options selected unless the
+     * multiple attribute is present and enabled.
+     *
+     * @param   mixed   $value
+     * @param   array   $attributes
+     * @return  array
+     */
+    protected function validateMultiValue( $value, array $attributes )
+    {
+        if ( is_array( $value ) &&
+            ( ! isset( $attributes['multiple'] ) ||
+              ! $attributes['multiple'] ) )
+        {
+            return array();
+        }
+
+        return parent::validateMultiValue( $value, $attributes );
+    }
+
 }
