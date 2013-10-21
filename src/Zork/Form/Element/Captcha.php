@@ -2,12 +2,11 @@
 
 namespace Zork\Form\Element;
 
-use Zend\Captcha\AbstractWord;
 use Zend\Captcha\AdapterInterface;
 use Zend\Form\Element\Captcha as ElementBase;
 use Zend\InputFilter\InputProviderInterface;
-use Zend\Session\Container as SessionContainer;
 use Zork\Form\TranslatorSettingsAwareInterface;
+use Zend\Session\Container as SessionContainer;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 
