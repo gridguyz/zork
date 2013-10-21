@@ -93,7 +93,7 @@ class Regeneratable extends Image
     public function getId()
     {
         if ( null !== $this->id &&
-             ! preg_match( '/^[a-z][a-z0-9_\\\]+$/i', $this->id ) )
+             ! preg_match( '/^[a-z0-9_\\\]+$/i', $this->id ) )
         {
             $this->id = null;
         }
