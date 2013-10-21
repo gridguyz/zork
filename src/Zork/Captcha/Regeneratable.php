@@ -86,6 +86,22 @@ class Regeneratable extends Image
     }
 
     /**
+     * Retrieve captcha ID
+     *
+     * @return string
+     */
+    public function getId()
+    {
+        if ( null !== $this->id &&
+             ! preg_match( '/^[a-z][a-z0-9_\\\]+$/i', $this->id ) )
+        {
+            $this->id = null;
+        }
+
+        return parent::getId();
+    }
+
+    /**
      * Re-generates the word & the image
      *
      * @return void
