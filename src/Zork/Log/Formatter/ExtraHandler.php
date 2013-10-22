@@ -26,16 +26,29 @@ class ExtraHandler extends Simple
      */
     public function format( $event )
     {
-        if ( ! empty( $event['extra'] ) )
+        $output = $this->format;
+
+        foreach ( $event as $key => $value )
         {
-            $event['extra'] = (string) Debug::dump(
-                $event['extra'],
-                'Extra',
-                false
-            );
+            if ( 'extra' === $key )
+            {
+                $value = Debug::dump( $value, $key, false );
+            }
+            else
+            {
+                $value = $this->normalize( $value );
+            }
+
+            $output = str_replace( "%$key%", $value, $output );
         }
 
-        return @ parent::format( $event );
+        if ( isset( $event['extra'] ) && empty( $event['extra'] ) &&
+             false !== strpos( $this->format, '%extra%' ) )
+        {
+            $output = rtrim( $output, ' ' );
+        }
+
+        return $output;
     }
 
 }
