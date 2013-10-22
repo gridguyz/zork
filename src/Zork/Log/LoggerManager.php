@@ -66,6 +66,9 @@ class LoggerManager
      */
     public function getLogger( $type )
     {
+        static $serviceTr       = array( '\\' => '', '_'  => '' ),
+               $mailServices    = array( 'mail', 'zendlogwritermail' );
+
         $type = (string) $type;
 
         if ( ! isset( $this->config[$type] ) )
@@ -93,13 +96,14 @@ class LoggerManager
                 $priority   = isset( $config['priority'] )  ? (int)     $config['priority'] : null;
 
                 if ( $this->serviceLocator !== null &&
-                     in_array( strtolower( $name ), array( 'mail', 'zend\log\writer\mail' ) ) )
+                     in_array( strtr( strtolower( $name ), $serviceTr ), $mailServices ) )
                 {
+                    $mailService = $this->serviceLocator
+                                        ->get( 'Zork\Mail\Service' );
+
                     if ( ! isset( $options['transport'] ) )
                     {
-                        $options['transport'] = $this->serviceLocator
-                                                     ->get( 'Zork\Mail\Service' )
-                                                     ->getTransport();
+                        $options['transport'] = $mailService->getTransport();
                     }
 
                     if ( ! isset( $options['mail'] ) )
@@ -107,9 +111,7 @@ class LoggerManager
                         $options['mail'] = array();
                     }
 
-                    $options['mail'] = $this->serviceLocator
-                                            ->get( 'Zork\Mail\Service' )
-                                            ->createMessage( $options['mail'] );
+                    $options['mail'] = $mailService->createMessage( $options['mail'] );
                 }
 
                 $writer = $logger->writerPlugin( $name, $options );
