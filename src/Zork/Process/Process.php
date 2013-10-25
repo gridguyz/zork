@@ -268,13 +268,32 @@ class Process
 
         $environment = (array) $this->environmentVariables;
 
+        if ( empty( $_ENV ) )
+        {
+            $globalVariables = array();
+
+            foreach ( $_SERVER as $key => $value )
+            {
+                $value = getenv( $key );
+
+                if ( false !== $value )
+                {
+                    $globalVariables[$key] = $value;
+                }
+            }
+        }
+        else
+        {
+            $globalVariables = $_ENV;
+        }
+
         if ( empty( $environment ) )
         {
-            $environment = $_ENV;
+            $environment = $globalVariables;
         }
         else if ( $this->mergeEnvironmentVariables )
         {
-            $environment = array_merge( $_ENV, $environment );
+            $environment = array_merge( $globalVariables, $environment );
         }
 
         $this->resource = proc_open(
