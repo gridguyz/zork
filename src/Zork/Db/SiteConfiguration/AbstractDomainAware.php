@@ -33,12 +33,20 @@ abstract class AbstractDomainAware implements SiteConfigurationInterface
         {
             switch ( true )
             {
+                case isset( $_SERVER['GRIDGUYZ_HOST'] ):
+                    $this->domain = $_SERVER['GRIDGUYZ_HOST'];
+                    break;
+
                 case isset( $_SERVER['HTTP_HOST'] ):
                     $this->domain = $_SERVER['HTTP_HOST'];
                     break;
 
                 case isset( $_SERVER['SERVER_NAME'] ):
                     $this->domain = $_SERVER['SERVER_NAME'];
+                    break;
+
+                case isset( $_SERVER['SERVER_ADDR'] ):
+                    $this->domain = $_SERVER['SERVER_ADDR'];
                     break;
             }
         }
