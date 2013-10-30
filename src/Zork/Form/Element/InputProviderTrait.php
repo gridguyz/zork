@@ -1023,10 +1023,14 @@ trait InputProviderTrait
 
         $spec['validators'] = ArrayUtils::merge(
             $spec['validators'],
-            $this->getRpcValidatorSpecifications(),
+            $this->getRpcValidatorSpecifications()
+        );
+        
+        $spec['validators'] = ArrayUtils::merge(
+            $spec['validators'],
             $this->getInputValidators()
         );
-
+        
         return $spec;
     }
 
