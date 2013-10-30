@@ -5,14 +5,14 @@ namespace Zork\Test\PHPUnit\Controller;
 use Zend\Stdlib\ArrayUtils;
 use Zork\Test\PHPUnit\TestCaseTrait;
 use Zend\Db\Adapter\Adapter as DbAdapter;
-use Zend\Test\PHPUnit\Controller\AbstractHttpControllerTestCase as BaseTestCase;
+use Zend\Test\PHPUnit\Controller\AbstractHttpControllerTestCase as ZendAbstractHttpControllerTestCase;
 
 /**
  * AbstractHttpControllerTestCase
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
  */
-class AbstractHttpControllerTestCase extends BaseTestCase
+abstract class AbstractHttpControllerTestCase extends ZendAbstractHttpControllerTestCase
 {
 
     use TestCaseTrait;
@@ -24,6 +24,9 @@ class AbstractHttpControllerTestCase extends BaseTestCase
      */
     protected $applicationConfigPath = 'config/application.php';
 
+    
+    protected $applicationRootPath = '.';
+    
     /**
      * Application config override
      *
@@ -41,6 +44,9 @@ class AbstractHttpControllerTestCase extends BaseTestCase
      */
     private $temporaryDbName;
 
+    
+    private $orginalCwd = null;
+    
     /**
      * Gc
      */
@@ -58,11 +64,27 @@ class AbstractHttpControllerTestCase extends BaseTestCase
         }
     }
 
+    public function setApplicationConfigPath($applicationConfigPath) {
+        $this->applicationConfigPath = $applicationConfigPath;
+        
+        return $this;
+    }
+    
+    public function setApplicationRootPath($applicationRootPath) {
+        $this->applicationRootPath = $applicationRootPath;
+        
+        return $this;
+    }
+    
     /**
      * Set config, clone the db & reset the application for isolation
      */
     public function setUp()
     {
+        $this->orginalCwd = getcwd();
+        
+        chdir($this->applicationRootPath);
+        
         parent::setUp();
         $this->gc();
         $config = include $this->applicationConfigPath;
@@ -96,6 +118,8 @@ class AbstractHttpControllerTestCase extends BaseTestCase
             $config,
             $this->applicationConfigOverride
         ) );
+        
+        
     }
 
     /**
@@ -132,6 +156,8 @@ class AbstractHttpControllerTestCase extends BaseTestCase
             $db = null;
             $this->gc();
         }
+        
+        chdir($this->orginalCwd);
     }
 
     /**
