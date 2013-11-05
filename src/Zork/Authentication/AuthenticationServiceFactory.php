@@ -11,6 +11,7 @@ use Zend\ServiceManager\ServiceLocatorInterface;
  * AuthenticationServiceFactory
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
+ * @deprecated use Grid\User\Authentication\AuthenticationServiceFactory instead
  */
 class AuthenticationServiceFactory implements FactoryInterface
 {
