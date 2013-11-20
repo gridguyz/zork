@@ -89,10 +89,10 @@ class JsValue
     protected static function error( $code, $warning = false, $param = null )
     {
         static $messages = array(
-            static::ERROR_SYNTAX_ERROR              => 'syntax error',
-            static::ERROR_UNEXPECTED_DATA_AT_END    => 'unexpected characters at the end of input',
-            static::ERROR_UNEXPECTED_END_OF_INPUT   => 'unexpeced end of input',
-            static::ERROR_UNKNOWN_CONSTRUCTOR       => 'unknown constructor "%s"',
+            self::ERROR_SYNTAX_ERROR              => 'syntax error',
+            self::ERROR_UNEXPECTED_DATA_AT_END    => 'unexpected characters at the end of input',
+            self::ERROR_UNEXPECTED_END_OF_INPUT   => 'unexpeced end of input',
+            self::ERROR_UNKNOWN_CONSTRUCTOR       => 'unknown constructor "%s"',
         );
 
         static::$lastError = $code;
