@@ -30,6 +30,11 @@ class OpenGraph extends AbstractHelper
     /**
      * @const string
      */
+    const PREFIX_FB = 'http://ogp.me/ns/fb#';
+
+    /**
+     * @const string
+     */
     const PREFIX_MUSIC = 'http://ogp.me/ns/music#';
 
     /**
@@ -604,6 +609,25 @@ class OpenGraph extends AbstractHelper
         }
 
         return $this;
+    }
+
+    /**
+     * Has a property defined?
+     *
+     * @param   string  $property
+     * @return  bool
+     */
+    public function hasProperty( $property )
+    {
+        foreach ( $this->properties as $meta )
+        {
+            if ( $meta['property'] == $property )
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
