@@ -19,11 +19,6 @@ class DiFactory extends ZendDiFactory
 {
 
     /**
-     * @const string
-     */
-    const DEFAULT_CACHE_NAMESPACE = 'Zork\Di\Definition\CachedRuntimeDefinition';
-
-    /**
      * {@inheritDoc}
      */
     public function createService( ServiceLocatorInterface $serviceLocator )
@@ -62,7 +57,7 @@ class DiFactory extends ZendDiFactory
 
                     if ( empty( $value['adapter']['options']['namespace'] ) )
                     {
-                        $namespace = static::DEFAULT_CACHE_NAMESPACE;
+                        $namespace = get_class( $definition );
                     }
                     else
                     {
