@@ -15,7 +15,7 @@ use Zork\Di\Definition\CachedRuntimeDefinition;
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
  */
-class DiFactory implements ZendDiFactory
+class DiFactory extends ZendDiFactory
 {
 
     /**
