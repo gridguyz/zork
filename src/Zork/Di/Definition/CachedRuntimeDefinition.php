@@ -159,8 +159,9 @@ class CachedRuntimeDefinition extends RuntimeDefinition
         {
             $success    = false;
             $count      = $this->cacheStorageCount;
-            $hit        = $storage->incrementItem( 'hit:' . $classLower, 1 ) ?: 0;
-            $definition = $storage->getItem( 'def:' . $classLower, $success );
+            $key        = str_replace( '\\', '-', $classLower );
+            $hit        = $storage->incrementItem( 'hit-' . $key, 1 ) ?: 0;
+            $definition = $storage->getItem( 'def-' . $key, $success );
 
             if ( $success )
             {
@@ -190,7 +191,7 @@ class CachedRuntimeDefinition extends RuntimeDefinition
             }
 
             $storage->setItem(
-                'def:' . $classLower,
+                'def-' . $key,
                 json_encode( $this->classes[$className], $jsonFlags )
             );
         }
