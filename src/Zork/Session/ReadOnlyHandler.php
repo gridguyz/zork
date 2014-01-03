@@ -3,6 +3,7 @@
 namespace Zork\Session;
 
 use SessionHandler;
+use Zend\Session\SaveHandler\SaveHandlerInterface;
 
 /**
  * ReadOnlyHandler
@@ -10,7 +11,7 @@ use SessionHandler;
  * @author David Pozsar <david.pozsar@megaweb.hu>
  * @codeCoverageIgnore
  */
-class ReadOnlyHandler extends SessionHandler
+class ReadOnlyHandler extends SessionHandler implements SaveHandlerInterface
 {
 
     /**

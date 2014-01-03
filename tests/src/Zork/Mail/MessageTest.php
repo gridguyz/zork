@@ -32,6 +32,69 @@ class MessageTest extends TestCase
     }
 
     /**
+     * Assert mime messages
+     *
+     * @param   array               $expected
+     * @param   \Zend\Mime\Message  $actual
+     */
+    public static function assertMimeMessages( $expected, Mime\Message $actual )
+    {
+        $found = array();
+
+        foreach ( $actual->getParts() as $part )
+        {
+            /* @var $part \Zend\Mime\Part */
+            static::assertInstanceOf( 'Zend\Mime\Part', $part );
+            $contentType = strtolower( $part->type );
+
+            if ( empty( $contentType ) )
+            {
+                foreach ( $part->getHeadersArray() as $header )
+                {
+                    list( $field, $value ) = $header;
+
+                    if ( strtolower( $field ) === 'content-type' )
+                    {
+                        $contentType = strtolower(
+                            preg_replace( '/^\s*([^;]+).*$/', '$1', $value )
+                        );
+
+                        break;
+                    }
+                }
+            }
+
+            foreach ( $expected as $mimeType => $rawContent )
+            {
+                if ( strtolower( $mimeType ) == $contentType )
+                {
+                    static::assertEquals(
+                        $rawContent,
+                        $part->getRawContent(),
+                        sprintf(
+                            'Content do not match in mime-type "%s"',
+                            $mimeType
+                        )
+                    );
+
+                    $found[$mimeType] = true;
+                }
+            }
+        }
+
+        foreach ( $expected as $mimeType => $rawContent )
+        {
+            static::assertFalse(
+                empty( $found[$mimeType] ),
+                sprintf(
+                    'Content not found in mime-type "%s"',
+                    $mimeType
+                )
+            );
+        }
+    }
+
+    /**
      * Test default user-agent
      */
     public function testUserAgent()
@@ -81,63 +144,89 @@ class MessageTest extends TestCase
     }
 
     /**
-     * Assert mime messages
-     *
-     * @param   array               $expected
-     * @param   \Zend\Mime\Message  $actual
+     * Test body mime-type aliases
      */
-    public static function assertMimeMessages( $expected, Mime\Message $actual )
+    public function testBodyMimeTypeAliases()
     {
-        $found = array();
+        $set = array(
+            'text' => 'foo',
+            'html' => 'bar',
+        );
 
-        foreach ( $actual->getParts() as $part )
-        {
-            /* @var $part \Zend\Mime\Part */
-            static::assertInstanceOf( 'Zend\Mime\Part', $part );
-            $contentType = null;
+        $get = array(
+            'text/plain' => 'foo',
+            'text/html'  => 'bar',
+        );
 
-            foreach ( $part->getHeadersArray() as $header )
-            {
-                list( $field, $value ) = $header;
+        $this->message->setBody( $set );
+        $body = $this->message->getBody();
 
-                if ( strtolower( $field ) === 'content-type' )
-                {
-                    $contentType = strtolower(
-                        preg_replace( '/\s*(;.*)?$/', '', $value )
-                    );
+        $this->assertInstanceOf( 'Zend\Mime\Message', $body );
+        $this->assertMimeMessages( $get, $body );
+    }
 
-                    break;
-                }
-            }
+    /**
+     * Test body is Mime\Part
+     */
+    public function testBodyIsMimePart()
+    {
+        $encoding = 'utf-8';
+        $part = new Mime\Part( '<b>foo-bar</b>' );
+        $part->type = 'text/html';
 
-            foreach ( $expected as $mimeType => $rawContent )
-            {
-                if ( strtolower( $mimeType ) == $contentType )
-                {
-                    static::assertEquals(
-                        $rawContent,
-                        $part->getRawContent(),
-                        sprintf(
-                            'Content do not match in mime-type "%s"',
-                            $mimeType
-                        )
-                    );
+        $this->message
+             ->setEncoding( $encoding )
+             ->setBody( $part );
 
-                    $found[$mimeType] = true;
-                }
-            }
-        }
+        $this->assertEquals( $encoding, $part->charset );
 
-        foreach ( $expected as $mimeType => $rawContent )
-        {
-            static::assertFalse(
-                empty( $found[$mimeType] ),
-                sprintf(
-                    'Content not found in mime-type "%s"',
-                    $mimeType
-                )
-            );
-        }
+        $body = $this->message->getBody();
+
+        $this->assertInstanceOf( 'Zend\Mime\Message', $body );
+        $this->assertMimeMessages(
+            array(
+                'text/html'     => '<b>foo-bar</b>',
+                'text/plain'    => 'foo-bar',
+            ),
+            $body
+        );
+    }
+
+
+    /**
+     * Test body in advanced hierarchy
+     */
+    public function testBodyAdvanced()
+    {
+        $message1       = new Mime\Message;
+        $htmlPart       = new Mime\Part( 'simple <b>html</b>' );
+        $htmlPart->type = 'text/html';
+        $textPart       = new Mime\Part( 'simple text' );
+        $textPart->type = 'text/plain';
+        $emptPart       = new Mime\Part( 'simple text alternative' );
+        $emptPart->type = '';
+
+        $message1->addPart( $htmlPart );
+        $message2 = clone $message1;
+        $message2->addPart( $textPart );
+
+        $this->message->setBody( array(
+            $message1,
+            $message2,
+            'text/plain' => $emptPart,
+        ) );
+
+        $body = $this->message->getBody();
+
+        $this->assertInstanceOf( 'Zend\Mime\Message', $body );
+        $this->assertMimeMessages(
+            array(
+                'multipart/mixed'   => $message2->generateMessage( \Zend\Mail\Headers::EOL ),
+                'text/html'         => 'simple <b>html</b>',
+                'text/plain'        => 'simple text alternative',
+            ),
+            $body
+        );
     }
 
 }
