@@ -176,6 +176,115 @@ class ImageTest extends TestCase
     );
 
     /**
+     * Assert 2 image files are equals (within a tolerance)
+     *
+     * @param   string  $expected
+     * @param   string  $actual
+     * @param   string  $message
+     * @param   float   $downscale
+     * @param   float   $tolerance
+     * @param   bool    $alpha
+     */
+    protected function assertImageFileEquals( $expected,
+                                              $actual,
+                                              $message   = '',
+                                              $downscale = 5,
+                                              $tolerance = 0.1,
+                                              $alpha     = false )
+    {
+        $expectedInfo   = getimagesize( $expected );
+        $actualInfo     = getimagesize( $actual );
+
+        $this->assertSame(
+            array_slice( $expectedInfo, 0, 3 ),
+            array_slice( $actualInfo, 0, 3 ),
+            $message
+        );
+
+        list( $width, $height, $type ) = $actualInfo;
+        $scaleToWidth   = max( 1, intval( $width / $downscale ) );
+        $scaleToHeight  = max( 1, intval( $height / $downscale ) );
+
+        $this->assertContains(
+            $type,
+            array(
+                IMAGETYPE_GIF,
+                IMAGETYPE_JPEG,
+                IMAGETYPE_PNG
+            ),
+            'Image types are not comparable'
+        );
+
+        switch ( $type )
+        {
+            case IMAGETYPE_GIF:
+                $expectedInput  = imagecreatefromgif( $expected );
+                $actualInput    = imagecreatefromgif( $actual );
+                break;
+
+            case IMAGETYPE_JPEG:
+                $expectedInput  = imagecreatefromjpeg( $expected );
+                $actualInput    = imagecreatefromjpeg( $actual );
+                break;
+
+            case IMAGETYPE_PNG:
+                $expectedInput  = imagecreatefrompng( $expected );
+                $actualInput    = imagecreatefrompng( $actual );
+                break;
+
+            default:
+                throw new \Exception;
+        }
+
+        $expectedCompare = imagecreatetruecolor( $scaleToWidth, $scaleToHeight );
+        $actualCompare   = imagecreatetruecolor( $scaleToWidth, $scaleToHeight );
+
+        imagecopyresampled(
+            $expectedCompare,
+            $expectedInput,
+            0, 0, 0, 0,
+            $scaleToWidth,
+            $scaleToHeight,
+            $width,
+            $height
+        );
+
+        imagecopyresampled(
+            $actualCompare,
+            $actualInput,
+            0, 0, 0, 0,
+            $scaleToWidth,
+            $scaleToHeight,
+            $width,
+            $height
+        );
+
+        $distance = 0;
+
+        for ( $x = 0; $x < $scaleToWidth; $x++ )
+        {
+            for ( $y = 0; $y < $scaleToHeight; $y++ )
+            {
+                $expectedIndex  = imagecolorat( $expectedCompare, $x, $y );
+                $actualIndex    = imagecolorat( $actualCompare, $x, $y );
+                @ list( $er, $eg, $eb, $ea ) = imagecolorsforindex( $expectedCompare, $expectedIndex );
+                @ list( $ar, $ag, $ab, $aa ) = imagecolorsforindex( $actualCompare, $actualIndex );
+                $ea = $alpha ? intval( $ea * 255 / 127 ) : 0;
+                $aa = $alpha ? intval( $aa * 255 / 127 ) : 0;
+                $expectedColor  = new Color( $er, $eg, $eb, $ea );
+                $actualColor    = new Color( $ar, $ag, $ab, $aa );
+                $distance += $expectedColor->distance( $actualColor, $alpha );
+            }
+        }
+
+        $this->assertLessThanOrEqual(
+            $tolerance,
+            $distance / $scaleToWidth / $scaleToHeight,
+            $message
+        );
+    }
+
+    /**
      * Test render & resizes
      */
     public function testRenderAndResizes()
@@ -188,15 +297,9 @@ class ImageTest extends TestCase
             $image->resize( 100, 100, $method );
             $image->render( __DIR__ . '/_files/~' . $file );
 
-         // TODO: cannot match the whole file, because the result is platform-dependent
-         // $this->assertFileEquals( __DIR__ . '/_files/' . $file, __DIR__ . '/_files/~' . $file );
-
-            $originalInfo = getimagesize( __DIR__ . '/_files/' . $file );
-            $renderedInfo = getimagesize( __DIR__ . '/_files/~' . $file );
-
-            $this->assertSame(
-                array_slice( $originalInfo, 0, 3 ),
-                array_slice( $renderedInfo, 0, 3 )
+            $this->assertImageFileEquals(
+                __DIR__ . '/_files/' . $file,
+                __DIR__ . '/_files/~' . $file
             );
 
             unlink( __DIR__ . '/_files/~' . $file );

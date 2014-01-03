@@ -33,6 +33,8 @@ class ServiceFactory implements FactoryInterface
         }
         catch ( ServiceNotFoundException $ex )
         {
+            // @codeCoverageIgnoreStart
+
             switch ( true )
             {
                 case isset( $_SERVER['HTTP_HOST'] ):
@@ -47,6 +49,8 @@ class ServiceFactory implements FactoryInterface
                     $domain = 'localhost';
                     break;
             }
+
+            // @codeCoverageIgnoreEnd
         }
 
         if ( empty( $mail['defaultFrom']['email'] ) )

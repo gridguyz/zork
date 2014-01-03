@@ -131,4 +131,18 @@ class HeadTitleTest extends TestCase
         );
     }
 
+    /**
+     * Test splice
+     */
+    public function testSplice()
+    {
+        $this->helper
+             ->splice( 1, 1, array( 'part2.1', 'part2.2' ) );
+
+        $this->assertEquals(
+            array( 'part1', 'part2.1', 'part2.2', 'part3' ),
+            iterator_to_array( $this->helper )
+        );
+    }
+
 }

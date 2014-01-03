@@ -204,6 +204,7 @@ class OpenGraph extends AbstractHelper
      * Retrieve the HeadMeta helper
      *
      * @return \Zend\View\Helper\HeadMeta
+     * @codeCoverageIgnore
      */
     protected function getHeadMetaHelper()
     {

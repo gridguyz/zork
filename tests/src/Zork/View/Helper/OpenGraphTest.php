@@ -190,4 +190,26 @@ class OpenGraphTest extends TestCase
         );
     }
 
+    /**
+     * Test hasProperty() method
+     */
+    public function testHasProperty()
+    {
+        $this->helper->append( 'property1', 'value1' );
+        $this->helper->append( 'property2', 'value2' );
+
+        $this->assertTrue( $this->helper->hasProperty( 'property1' ) );
+        $this->assertTrue( $this->helper->hasProperty( 'property2' ) );
+        $this->assertFalse( $this->helper->hasProperty( 'property3' ) );
+    }
+
+    /**
+     * Test getSafeLocale() method
+     */
+    public function testGetSafeLocale()
+    {
+        $this->assertEquals( 'en_US', $this->helper->getSafeLocale( 'en' ) );
+        $this->assertEquals( 'en_US', $this->helper->getSafeLocale( 'en_US' ) );
+    }
+
 }

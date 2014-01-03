@@ -3,6 +3,7 @@
 namespace Zork\View\Helper;
 
 use Zend\View\Helper\AbstractHelper;
+use Zend\View\Helper\EscapeHtmlAttr as ZendEscapeHtmlAttr;
 
 /**
  * HtmlTag
@@ -21,6 +22,7 @@ class HtmlTag extends AbstractHelper
      * Retrieve the EscapeHtmlAttr helper
      *
      * @return \Zend\View\Helper\EscapeHtmlAttr
+     * @codeCoverageIgnore
      */
     protected function getEscapeHtmlAttrHelper()
     {
@@ -35,7 +37,7 @@ class HtmlTag extends AbstractHelper
                                                ->plugin( 'escapeHtmlAttr' );
         }
 
-        if ( ! $this->escapeHtmlAttrHelper instanceof \Zend\View\Helper\EscapeHtmlAttr )
+        if ( ! $this->escapeHtmlAttrHelper instanceof ZendEscapeHtmlAttr )
         {
             $this->escapeHtmlAttrHelper = new EscapeHtmlAttr();
         }

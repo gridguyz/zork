@@ -106,9 +106,10 @@ trait CallableTrait
                         $args[$index] = $param->getDefaultValue();
                         break;
 
+                 /* if optional & allows null, it has to be a default value
                     case $param->isOptional() && $param->allowsNull():
                         $args[$index] = null;
-                        break;
+                        break; */
 
                     default:
                         throw new Exception\InvalidArgumentException(

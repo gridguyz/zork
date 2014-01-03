@@ -30,11 +30,11 @@ class ForbiddenTest extends TestCase
     public function testDefault()
     {
         $validator = new Forbidden( array(
-            'haystack' => array( 'foo', 'bar' ),
+            'haystack' => array( 'foo', 'bar', 42, '43foo' ),
         ) );
 
         $this->assertFalse( $validator->getRecursive() );
-        $this->assertSame( array( 'foo', 'bar' ), $validator->getHaystack() );
+        $this->assertSame( array( 'foo', 'bar', 42, '43foo' ), $validator->getHaystack() );
 
         $this->assertFalse( $validator->isValid( 'foo' ), implode( PHP_EOL, $validator->getMessages() ) );
         $this->assertFalse( $validator->isValid( 'bar' ), implode( PHP_EOL, $validator->getMessages() ) );
@@ -42,6 +42,13 @@ class ForbiddenTest extends TestCase
         $this->assertTrue( $validator->isValid( '' ), implode( PHP_EOL, $validator->getMessages() ) );
         $this->assertTrue( $validator->isValid( '0' ), implode( PHP_EOL, $validator->getMessages() ) );
         $this->assertTrue( $validator->isValid( 0 ), implode( PHP_EOL, $validator->getMessages() ) );
+        $this->assertFalse( $validator->isValid( 42 ), implode( PHP_EOL, $validator->getMessages() ) );
+        $this->assertTrue( $validator->isValid( 43 ), implode( PHP_EOL, $validator->getMessages() ) );
+        $this->assertTrue( $validator->isValid( '43' ), implode( PHP_EOL, $validator->getMessages() ) );
+        $this->assertTrue( $validator->isValid( '42foo' ), implode( PHP_EOL, $validator->getMessages() ) );
+
+        $this->setExpectedException( 'InvalidArgumentException' );
+        $validator->setStrict( PHP_INT_MAX );
     }
 
     /**
@@ -50,8 +57,8 @@ class ForbiddenTest extends TestCase
     public function testStrict()
     {
         $validator = new Forbidden( array(
-            'haystack' => array( 1, '2', 'foo' ),
-            'strict'   => Forbidden::COMPARE_STRICT,
+            'haystack'  => array( 1, '2', 'foo' ),
+            'strict'    => Forbidden::COMPARE_STRICT,
         ) );
 
         $this->assertEquals( Forbidden::COMPARE_STRICT, $validator->getStrict() );
@@ -73,8 +80,8 @@ class ForbiddenTest extends TestCase
     public function testNotStrict()
     {
         $validator = new Forbidden( array(
-            'haystack' => array( 1, '2', 'foo' ),
-            'strict'   => Forbidden::COMPARE_NOT_STRICT,
+            'haystack'  => array( 1, '2', 'foo' ),
+            'strict'    => Forbidden::COMPARE_NOT_STRICT,
         ) );
 
         $this->assertEquals( Forbidden::COMPARE_NOT_STRICT, $validator->getStrict() );
@@ -96,7 +103,7 @@ class ForbiddenTest extends TestCase
     public function testRecursive()
     {
         $validator = new Forbidden( array(
-            'haystack'  => array( 'foo', 'baz' => array( 'bar' ) ),
+            'haystack'  => array( 'foo', 'baz' => array( 'bar', 42 ), '43foo' ),
             'recursive' => true,
         ) );
 
@@ -108,6 +115,36 @@ class ForbiddenTest extends TestCase
         $this->assertTrue( $validator->isValid( '' ), implode( PHP_EOL, $validator->getMessages() ) );
         $this->assertTrue( $validator->isValid( '0' ), implode( PHP_EOL, $validator->getMessages() ) );
         $this->assertTrue( $validator->isValid( 0 ), implode( PHP_EOL, $validator->getMessages() ) );
+        $this->assertFalse( $validator->isValid( 42 ), implode( PHP_EOL, $validator->getMessages() ) );
+        $this->assertTrue( $validator->isValid( 43 ), implode( PHP_EOL, $validator->getMessages() ) );
+        $this->assertTrue( $validator->isValid( '43' ), implode( PHP_EOL, $validator->getMessages() ) );
+        $this->assertTrue( $validator->isValid( '42foo' ), implode( PHP_EOL, $validator->getMessages() ) );
+    }
+
+    /**
+     * Test recursive & strict
+     */
+    public function testRecursiveStrict()
+    {
+        $validator = new Forbidden( array(
+            'haystack'  => array( 'foo', 'baz' => array( 'bar', 42 ), '43foo' ),
+            'strict'    => Forbidden::COMPARE_STRICT,
+            'recursive' => true,
+        ) );
+
+        $this->assertTrue( $validator->getRecursive() );
+
+        $this->assertFalse( $validator->isValid( 'foo' ), implode( PHP_EOL, $validator->getMessages() ) );
+        $this->assertFalse( $validator->isValid( 'bar' ), implode( PHP_EOL, $validator->getMessages() ) );
+        $this->assertTrue( $validator->isValid( 'baz' ), implode( PHP_EOL, $validator->getMessages() ) );
+        $this->assertTrue( $validator->isValid( '' ), implode( PHP_EOL, $validator->getMessages() ) );
+        $this->assertTrue( $validator->isValid( '0' ), implode( PHP_EOL, $validator->getMessages() ) );
+        $this->assertTrue( $validator->isValid( 0 ), implode( PHP_EOL, $validator->getMessages() ) );
+        $this->assertFalse( $validator->isValid( 42 ), implode( PHP_EOL, $validator->getMessages() ) );
+        $this->assertTrue( $validator->isValid( '42' ), implode( PHP_EOL, $validator->getMessages() ) );
+        $this->assertTrue( $validator->isValid( 43 ), implode( PHP_EOL, $validator->getMessages() ) );
+        $this->assertTrue( $validator->isValid( '43' ), implode( PHP_EOL, $validator->getMessages() ) );
+        $this->assertTrue( $validator->isValid( '42foo' ), implode( PHP_EOL, $validator->getMessages() ) );
     }
 
 }

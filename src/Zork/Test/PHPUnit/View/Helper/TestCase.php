@@ -3,6 +3,7 @@
 namespace Zork\Test\PHPUnit\View\Helper;
 
 use ReflectionClass;
+use Zork\Stdlib\String;
 use PHPUnit_Framework_Exception;
 
 /**
@@ -99,7 +100,7 @@ abstract class TestCase extends \Zork\Test\PHPUnit\TestCase
 
         if ( ! class_exists( $name ) )
         {
-            $name = 'Zend\\View\\Helper\\' . ucfirst( $name ) ;
+            $name = 'Zend\\View\\Helper\\' . String::camelize( $name, '_', false );
         }
 
         if ( ! class_exists( $name ) )

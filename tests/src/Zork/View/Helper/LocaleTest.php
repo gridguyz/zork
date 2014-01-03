@@ -2,6 +2,7 @@
 
 namespace Zork\View\Helper;
 
+use Locale as IntlLocale;
 use Zork\I18n\Locale\Locale;
 use Zork\Test\PHPUnit\View\Helper\TestCase;
 
@@ -54,7 +55,7 @@ class LocaleTest extends TestCase
      */
     public function setUp()
     {
-        $this->previousLocale = static::$locale->getCurrent();
+        $this->previousLocale = IntlLocale::getDefault();
         static::$locale->setCurrent( 'en_US' );
 
         parent::setUp();
@@ -70,7 +71,7 @@ class LocaleTest extends TestCase
 
         if ( null !== $this->previousLocale )
         {
-            static::$locale->setCurrent( $this->previousLocale );
+            IntlLocale::setDefault( $this->previousLocale );
             $this->previousLocale = null;
         }
     }

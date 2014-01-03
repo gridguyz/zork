@@ -100,4 +100,13 @@ class ColorTest extends TestCase
         $this->assertEquals( '01234567', (string) Color::create( '01234567' ) );
     }
 
+    /**
+     * Test distance
+     */
+    public function testDistance()
+    {
+        $this->assertGreaterThan( 0.8, Color::create( 'ff0000' )->distance( '0000ff' ) );
+        $this->assertLessThan( 0.1, Color::create( 'ff0000' )->distance( 'f80800' ) );
+    }
+
 }
