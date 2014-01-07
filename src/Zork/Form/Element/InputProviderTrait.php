@@ -627,12 +627,12 @@ trait InputProviderTrait
 
         foreach ( $this->getRpcValidators() as $rpc )
         {
-            $parts = explode( '::', $rpc, 2 );
-
-            if ( empty( $parts ) )
+            if ( empty( $rpc ) )
             {
                 continue;
             }
+
+            $parts = explode( '::', $rpc, 2 );
 
             $options = array(
                 'service' => array_shift( $parts ),
@@ -935,9 +935,11 @@ trait InputProviderTrait
     public function getInputSpecification()
     {
         if ( is_callable( 'parent::getInputSpecification' ) )
+        // @codeCoverageIgnoreStart
         {
             $spec = parent::getInputSpecification();
         }
+        // @codeCoverageIgnoreEnd
         else
         {
             $spec = array(
@@ -1025,12 +1027,12 @@ trait InputProviderTrait
             $spec['validators'],
             $this->getRpcValidatorSpecifications()
         );
-        
+
         $spec['validators'] = ArrayUtils::merge(
             $spec['validators'],
             $this->getInputValidators()
         );
-        
+
         return $spec;
     }
 

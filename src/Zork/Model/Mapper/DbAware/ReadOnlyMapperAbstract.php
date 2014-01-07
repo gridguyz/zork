@@ -783,7 +783,6 @@ abstract class ReadOnlyMapperAbstract
      *
      * @param mixed $value
      * @return bool
-     * @codeCoverageIgnore
      */
     protected static function toBool( $value )
     {
@@ -855,9 +854,7 @@ abstract class ReadOnlyMapperAbstract
     protected static function toDate( $value )
     {
         return new DateTime(
-            is_int( $value )
-                ? '@' . $value
-                : (string) $value
+            is_int( $value ) ? '@' . $value : (string) $value
         );
     }
 

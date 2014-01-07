@@ -102,7 +102,7 @@ abstract class ReadWriteMapperAbstract
      * (use time-zones)
      * @var array
      */
-    const DATETIME      = self::DATE;
+    const DATETIME      = 'self::toDate;self::fromDateTime';
 
     /**
      * Number-array type-converters for selected(), deselect()
@@ -474,6 +474,24 @@ abstract class ReadWriteMapperAbstract
      * @return string
      */
     protected static function fromDate( $value )
+    {
+        if ( $value instanceof \DateTime )
+        {
+            return $value->format( 'Y-m-d' );
+        }
+        else
+        {
+            return (string) $value;
+        }
+    }
+
+    /**
+     * Return the Postgres-compliant date format from a Zend_Date object
+     *
+     * @param \DateTime $value
+     * @return string
+     */
+    protected static function fromDateTime( $value )
     {
         if ( $value instanceof \DateTime )
         {

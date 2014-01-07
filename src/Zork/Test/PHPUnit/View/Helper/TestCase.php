@@ -78,6 +78,26 @@ abstract class TestCase extends \Zork\Test\PHPUnit\TestCase
     }
 
     /**
+     * Guess plugin classes for a name
+     *
+     * @param   string  $name
+     * @return  array
+     */
+    protected function guessPluginClassesForName( $name )
+    {
+        $camelized = String::camelize( $name, '_', false );
+
+        return array(
+            'Zork\\View\\Helper\\' . $camelized,
+            'Zend\\View\\Helper\\' . $camelized,
+            'Zork\\I18n\\View\\Helper\\' . $camelized,
+            'Zend\\I18n\\View\\Helper\\' . $camelized,
+            'Zork\\Form\\View\\Helper\\' . $camelized,
+            'Zend\\Form\\View\\Helper\\' . $camelized,
+        );
+    }
+
+    /**
      * Create plugin
      *
      * @param   string  $name
@@ -100,7 +120,14 @@ abstract class TestCase extends \Zork\Test\PHPUnit\TestCase
 
         if ( ! class_exists( $name ) )
         {
-            $name = 'Zend\\View\\Helper\\' . String::camelize( $name, '_', false );
+            foreach ( $this->guessPluginClassesForName( $name ) as $class )
+            {
+                if ( class_exists( $class ) )
+                {
+                    $name = $class;
+                    break;
+                }
+            }
         }
 
         if ( ! class_exists( $name ) )
