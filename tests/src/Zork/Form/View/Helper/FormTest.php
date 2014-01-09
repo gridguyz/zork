@@ -5,7 +5,6 @@ namespace Zork\Form\View\Helper;
 use Zork\Form\Form;
 use Zork\Form\Element;
 use Zend\Form\Fieldset;
-use Zend\Form\Element as ZendElement;
 use Zork\Test\PHPUnit\View\Helper\TestCase;
 
 /**
@@ -31,18 +30,39 @@ class FormTest extends TestCase
      */
     public function testInvoke()
     {
-        $form       = new Form( 'test_form' );
-        $fieldset   = new Fieldset( 'test_fieldset' );
-        $text       = new Element\Text( 'test_text' );
-        $hidden     = new Element\Hidden( 'test_hidden' );
-        $search     = new Element\Search( 'test_search' );
-        $submit     = new Element\Submit( 'test_submit' );
+        $form = new Form( 'test_form', array(
+            'description' => array(
+                'label'         => 'form description',
+                'translatable'  => false,
+                'attributes'    => array(
+                    'class'     => 'form-description',
+                ),
+            )
+        ) );
+
+        $fieldset = new Fieldset( 'test_fieldset', array(
+            'description' => array(
+                'label'         => 'fieldset description',
+                'translatable'  => false,
+            ),
+        ) );
+
+        $text = new Element\Text( 'test_text', array(
+            'description'   => 'text description',
+            'display_group' => 'display group',
+        ) );
+
+        $hidden = new Element\Hidden( 'test_hidden' );
+        $search = new Element\Search( 'test_search', array(
+            'display_group' => 'display group',
+        ) );
+
+        $submit = new Element\Submit( 'test_submit' );
 
         $fieldset->setLabel( 'fieldset label' );
         $text->setLabel( 'text label' );
-        $hidden->setLabel( 'hidden label' );
         $search->setLabel( 'search label' );
-        $submit->setLabel( 'submit label' );
+        $submit->setValue( 'submit label' );
 
         $fieldset->add( $text );
         $fieldset->add( $hidden );
@@ -59,20 +79,25 @@ class FormTest extends TestCase
 
         $translator->expects( $this->at( 2 ) )
                    ->method( 'translate' )
-                   ->with( 'text label', 'text domain' )
-                   ->will( $this->returnValue( 'text label at text domain' ) );
+                   ->with( 'display group', 'text domain' )
+                   ->will( $this->returnValue( 'display group at text domain' ) );
 
         $translator->expects( $this->at( 3 ) )
                    ->method( 'translate' )
-                   ->with( 'hidden label', 'text domain' )
-                   ->will( $this->returnValue( 'hidden label at text domain' ) );
+                   ->with( 'text label', 'text domain' )
+                   ->will( $this->returnValue( 'text label at text domain' ) );
 
         $translator->expects( $this->at( 4 ) )
+                   ->method( 'translate' )
+                   ->with( 'text description', 'text domain' )
+                   ->will( $this->returnValue( 'text description at text domain' ) );
+
+        $translator->expects( $this->at( 5 ) )
                    ->method( 'translate' )
                    ->with( 'search label', 'text domain' )
                    ->will( $this->returnValue( 'search label at text domain' ) );
 
-        $translator->expects( $this->at( 5 ) )
+        $translator->expects( $this->at( 6 ) )
                    ->method( 'translate' )
                    ->with( 'submit label', 'text domain' )
                    ->will( $this->returnValue( 'submit label at text domain' ) );
@@ -90,6 +115,15 @@ class FormTest extends TestCase
         );
 
         $this->assertTag(
+            array(
+                'class'         => 'form-description description',
+                'ancestor'      => $formMatcher,
+                'content'       => 'form description',
+            ),
+            $rendered
+        );
+
+        $this->assertTag(
             $fieldsetMatcher = array(
                 'tag'           => 'fieldset',
                 'ancestor'      => $formMatcher,
@@ -102,8 +136,46 @@ class FormTest extends TestCase
 
         $this->assertTag(
             array(
-                'tag'           => 'input',
+                'tag'           => 'legend',
+                'parent'        => $fieldsetMatcher,
+                'content'       => 'fieldset label at text domain',
+            ),
+            $rendered
+        );
+
+        $this->assertTag(
+            array(
+                'class'         => 'description',
                 'ancestor'      => $fieldsetMatcher,
+                'content'       => 'fieldset description',
+            ),
+            $rendered
+        );
+
+        $this->assertTag(
+            $displayGroupMatcher = array(
+                'tag'           => 'fieldset',
+                'ancestor'      => $fieldsetMatcher,
+                'attributes'    => array(
+                    'class'     => 'display-group',
+                ),
+            ),
+            $rendered
+        );
+
+        $this->assertTag(
+            array(
+                'tag'           => 'label',
+                'ancestor'      => $displayGroupMatcher,
+                'content'       => 'text label at text domain',
+            ),
+            $rendered
+        );
+
+        $this->assertTag(
+            array(
+                'tag'           => 'input',
+                'ancestor'      => $displayGroupMatcher,
                 'attributes'    => array(
                     'type'      => 'text',
                     'name'      => 'test_fieldset[test_text]',
@@ -126,8 +198,17 @@ class FormTest extends TestCase
 
         $this->assertTag(
             array(
+                'tag'           => 'label',
+                'ancestor'      => $displayGroupMatcher,
+                'content'       => 'search label at text domain',
+            ),
+            $rendered
+        );
+
+        $this->assertTag(
+            array(
                 'tag'           => 'input',
-                'ancestor'      => $fieldsetMatcher,
+                'ancestor'      => $displayGroupMatcher,
                 'attributes'    => array(
                     'type'      => 'search',
                     'name'      => 'test_fieldset[test_search]',
@@ -143,6 +224,7 @@ class FormTest extends TestCase
                 'attributes'    => array(
                     'type'      => 'submit',
                     'name'      => 'test_submit',
+                    'value'     => 'submit label at text domain',
                 ),
             ),
             $rendered

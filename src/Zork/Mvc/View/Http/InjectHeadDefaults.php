@@ -51,6 +51,17 @@ class InjectHeadDefaults extends AbstractListenerAggregate
      */
     public function __construct( $definitions = array() )
     {
+        $this->setDefinitions( $definitions );
+    }
+
+    /**
+     * Set definitions
+     *
+     * @param   array|\Traversable  $definitions
+     * @return  array
+     */
+    public function setDefinitions( $definitions )
+    {
         if ( $definitions instanceof Traversable )
         {
             $definitions = ArrayUtils::iteratorToArray( $definitions );
@@ -61,6 +72,17 @@ class InjectHeadDefaults extends AbstractListenerAggregate
         }
 
         $this->definitions = $definitions;
+        return $this;
+    }
+
+    /**
+     * Get definitions
+     *
+     * @return  array
+     */
+    public function getDefinitions()
+    {
+        return $this->definitions;
     }
 
     /**

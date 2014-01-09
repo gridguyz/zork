@@ -360,7 +360,7 @@ class Form extends BaseHelper
 
             foreach ( $description['attributes'] as $attr => $value )
             {
-                $attributes .= ' ' . $attr . '=' . $escape( $value );
+                $attributes .= sprintf( ' %s="%s"', $attr, $escape( $value ) );
             }
 
             $markup .= sprintf( $this->descriptionOpen, $attributes );
@@ -431,7 +431,6 @@ class Form extends BaseHelper
             $markup .= $this->renderFieldset( $element, 'fieldset' );
             $markup .= PHP_EOL;
             $markup .= '</fieldset>';
-            $markup .= $this->renderDescription( $element );
             $markup .= PHP_EOL;
             $markup .= $this->inputClose;
         }
