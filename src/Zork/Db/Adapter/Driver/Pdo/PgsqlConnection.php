@@ -100,7 +100,9 @@ class PgsqlConnection extends Connection
             return $result->fetchAll( \PDO::FETCH_COLUMN );
         }
 
+        // @codeCoverageIgnoreStart
         return null;
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -164,7 +166,7 @@ class PgsqlConnection extends Connection
     }
 
     /**
-     * Get current transation nexting level
+     * Get current transation nesting level
      *
      * @return int
      */
@@ -349,11 +351,15 @@ class PgsqlConnection extends Connection
     }
 
     /**
-     * Execute
+     * Execute an SQL query
+     *
+     * Displays a more informative exception.
+     * Old one attached as previous exception.
      *
      * @param   string $sql
      * @return  \Zend\Db\Adapter\Driver\Pdo\Result
      * @throws  InvalidQueryException
+     * @codeCoverageIgnore
      */
     public function execute( $sql )
     {
