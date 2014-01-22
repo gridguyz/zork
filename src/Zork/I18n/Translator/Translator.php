@@ -2,6 +2,7 @@
 
 namespace Zork\I18n\Translator;
 
+use ArrayAccess;
 use Traversable;
 use Zend\I18n\Exception;
 use Zend\Stdlib\ArrayUtils;
@@ -293,12 +294,40 @@ class Translator extends ZendTranslator
                                      $textDomain    = 'default',
                                      $locale        = null )
     {
-        return parent::translatePlural(
+        $locale      = (string) $locale ?: $this->getLocale();
+        $textDomain  = strstr( $singular, '.', true ) ?: strstr( $plural, '.', true ) ?: $textDomain;
+        $translation = $this->getTranslatedMessage(
             $singular,
-            $plural,
-            $number,
-            strstr( $singular, '.', true ) ?: strstr( $plural, '.', true ) ?: $textDomain,
-            (string) $locale ?: null
+            $locale,
+            $textDomain
+        );
+
+        if ( is_array( $translation ) || $translation instanceof ArrayAccess )
+        {
+            if ( isset( $this->messages[$textDomain][$locale] ) )
+            {
+                return parent::translatePlural( $singular, $plural, $number, $textDomain, $locale );
+            }
+
+            $index = $this->myMessages[$textDomain][$locale]
+                          ->getPluralRule()
+                          ->evaluate( $number );
+
+            if ( ! isset( $translation[$index] ) )
+            {
+                throw new Exception\OutOfBoundsException( sprintf(
+                    'Provided index %d does not exist in plural array',
+                    $index
+                ) );
+            }
+
+            return $translation[$index];
+        }
+
+        return parent::translate(
+            ( 1 == $number ) ? $singular : $plural,
+            $textDomain,
+            $locale
         );
     }
 

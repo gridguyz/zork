@@ -129,7 +129,15 @@ class FunctionCall extends AbstractSql
      */
     public function getName()
     {
-        return $this->name;
+        return $this->function;
+    }
+
+    /**
+     * @return string|array
+     */
+    public function getFunction()
+    {
+        return $this->function;
     }
 
     /**
@@ -153,19 +161,10 @@ class FunctionCall extends AbstractSql
      *
      * @param  array $values
      * @param  string $flag one of ARGUMENTS_MERGE or ARGUMENTS_SET; defaults to ARGUMENTS_SET
-     * @throws Exception\InvalidArgumentException
      * @return FunctionCall
      */
     public function arguments( array $values, $flag = self::ARGUMENTS_SET )
     {
-        if ( $values == null )
-        {
-            throw new Exception\InvalidArgumentException( sprintf(
-                '%s: arguments() expects an array of values',
-                __METHOD__
-            ) );
-        }
-
         if ( $flag == self::ARGUMENTS_MERGE )
         {
             $this->arguments = array_merge( $this->arguments, $values );
@@ -267,11 +266,11 @@ class FunctionCall extends AbstractSql
             }
             elseif ( null === $argument )
             {
-                $values[] = 'NULL';
+                $arguments[] = 'NULL';
             }
             else
             {
-                $values[] = $adapterPlatform->quoteValue( $argument );
+                $arguments[] = $adapterPlatform->quoteValue( $argument );
             }
         }
 
