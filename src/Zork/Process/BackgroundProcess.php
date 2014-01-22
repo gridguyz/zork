@@ -14,6 +14,7 @@ class BackgroundProcess extends Process
      * Get run command
      *
      * @return  string|null
+     * @codeCoverageIgnore
      */
     public function getRunCommand()
     {

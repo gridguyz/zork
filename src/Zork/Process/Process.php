@@ -57,9 +57,39 @@ class Process
     const MODE_APPEND = 'a';
 
     /**
+     * @const string
+     */
+    const DEFAULT_OPEN_CALLBACK = 'proc_open';
+
+    /**
+     * @const string
+     */
+    const DEFAULT_CLOSE_CALLBACK = 'proc_close';
+
+    /**
+     * @const string
+     */
+    const DEFAULT_VALIDATION_CALLBACK = 'is_resource';
+
+    /**
      * @var string
      */
     protected $command;
+
+    /**
+     * @var callable
+     */
+    protected $openCallback = self::DEFAULT_OPEN_CALLBACK;
+
+    /**
+     * @var callable
+     */
+    protected $closeCallback = self::DEFAULT_CLOSE_CALLBACK;
+
+    /**
+     * @var callable
+     */
+    protected $validationCallback = self::DEFAULT_VALIDATION_CALLBACK;
 
     /**
      * @var array
@@ -109,6 +139,82 @@ class Process
     }
 
     /**
+     * Get command
+     *
+     * @return  string
+     */
+    public function getCommand()
+    {
+        return $this->command;
+    }
+
+    /**
+     * Set open callback
+     *
+     * @param   callable $callback
+     * @return  Process
+     */
+    public function setOpenCallback( callable $callback )
+    {
+        $this->openCallback = $callback;
+        return $this;
+    }
+
+    /**
+     * Get open callback
+     *
+     * @return  callable
+     */
+    public function getOpenCallback()
+    {
+        return $this->openCallback;
+    }
+
+    /**
+     * Set close callback
+     *
+     * @param   callable $callback
+     * @return  Process
+     */
+    public function setCloseCallback( callable $callback )
+    {
+        $this->closeCallback = $callback;
+        return $this;
+    }
+
+    /**
+     * Get close callback
+     *
+     * @return  callable
+     */
+    public function getCloseCallback()
+    {
+        return $this->closeCallback;
+    }
+
+    /**
+     * Set validation callback
+     *
+     * @param   callable $callback
+     * @return  Process
+     */
+    public function setValidationCallback( callable $callback )
+    {
+        $this->validationCallback = $callback;
+        return $this;
+    }
+
+    /**
+     * Get validation callback
+     *
+     * @return  callable
+     */
+    public function getValidationCallback()
+    {
+        return $this->validationCallback;
+    }
+
+    /**
      * Set arguments
      *
      * @param   array|\Traversable|null $arguments
@@ -134,6 +240,16 @@ class Process
     }
 
     /**
+     * Get arguments
+     *
+     * @return  array
+     */
+    public function getArguments()
+    {
+        return $this->arguments;
+    }
+
+    /**
      * Set working directory
      *
      * @param   string|null $workingDirectory
@@ -143,6 +259,16 @@ class Process
     {
         $this->workingDirectory = (string) $workingDirectory ?: null;
         return $this;
+    }
+
+    /**
+     * Get working directory
+     *
+     * @return  string|null
+     */
+    public function getWorkingDirectory()
+    {
+        return $this->workingDirectory;
     }
 
     /**
@@ -172,6 +298,16 @@ class Process
     }
 
     /**
+     * Get environment variables
+     *
+     * @return  array|null
+     */
+    public function getEnvironmentVariables()
+    {
+        return $this->environmentVariables;
+    }
+
+    /**
      * Set merge environment variables
      *
      * @param   bool    $merge
@@ -181,6 +317,16 @@ class Process
     {
         $this->mergeEnvironmentVariables = (bool) $merge;
         return $this;
+    }
+
+    /**
+     * Get merge environment variables
+     *
+     * @return  bool
+     */
+    public function getMergeEnvironmentVariables()
+    {
+        return $this->mergeEnvironmentVariables;
     }
 
     /**
@@ -206,6 +352,16 @@ class Process
 
         $this->options = $options;
         return $this;
+    }
+
+    /**
+     * Get options
+     *
+     * @return  array
+     */
+    public function getOptions()
+    {
+        return $this->options;
     }
 
     /**
@@ -253,7 +409,8 @@ class Process
      */
     public function isOpened()
     {
-        return $this->resource && is_resource( $this->resource );
+        $validator = $this->validationCallback;
+        return $this->resource && $validator( $this->resource );
     }
 
     /**
@@ -296,7 +453,8 @@ class Process
             $environment = array_merge( $globalVariables, $environment );
         }
 
-        $this->resource = proc_open(
+        $open = $this->openCallback;
+        $this->resource = $open(
             $this->getRunCommand(),
             $descriptorspec,
             $this->pipes,
@@ -331,13 +489,14 @@ class Process
         {
             foreach ( $this->pipes as $pipe )
             {
-                if ( is_reource( $pipe ) )
+                if ( is_resource( $pipe ) )
                 {
                     fclose( $pipe );
                 }
             }
 
-            $result = proc_close( $this->resource );
+            $close  = $this->closeCallback;
+            $result = $close( $this->resource );
             $this->resource = null;
             $this->pipes    = array();
             return $result;
@@ -359,6 +518,8 @@ class Process
 
     /**
      * Destructor
+     *
+     * @codeCoverageIgnore
      */
     public function __destruct()
     {
