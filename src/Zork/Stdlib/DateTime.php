@@ -39,7 +39,7 @@ class DateTime extends Base implements ArrayAccess
     public function setDefaultFormat( $defaultFormat, $canUseConstant = true )
     {
         $defaultFormat = (string) $defaultFormat;
-        $constant      = get_called_class() . '::' .
+        $constant      = get_class( $this ) . '::' .
                          strtoupper( $defaultFormat );
 
         if ( $canUseConstant && defined( $constant ) )
@@ -59,6 +59,16 @@ class DateTime extends Base implements ArrayAccess
     public function __toString()
     {
         return (string) $this->format( $this->defaultFormat );
+    }
+
+    /**
+     * Convert to hash
+     *
+     * @return string
+     */
+    public function toHash()
+    {
+        return base_convert( $this->format( 'Uu' ), 10, 36 );
     }
 
     /**
@@ -88,6 +98,31 @@ class DateTime extends Base implements ArrayAccess
             : parent::createFromFormat( $format, $time );
 
         return new static( $date->format( DateTime::ISO8601 ) );
+    }
+
+    /**
+     * Create a DateTime object from various formats
+     *
+     * @param   DateTime|\DateTime|string|int|null  $dateTime
+     * @param   bool                                $nullOnEmpty
+     * @return  DateTime|null
+     */
+    public static function create( $dateTime, $nullOnEmpty = false )
+    {
+        if ( $nullOnEmpty && empty( $dateTime ) )
+        {
+            return null;
+        }
+        else if ( $dateTime instanceof \DateTime )
+        {
+            return new static( $dateTime->format( \DateTime::ISO8601 ) );
+        }
+        else if ( is_numeric( $dateTime ) )
+        {
+            return new static( '@' . $dateTime );
+        }
+
+        return new static( (string) $dateTime );
     }
 
     /**
