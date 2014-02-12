@@ -17,6 +17,11 @@ class DateTime extends Base implements ArrayAccess
 {
 
     /**
+     * @const string
+     */
+    const CONVERT = 'Y-m-d\TH:i:s.uO';
+
+    /**
      * @var string
      */
     protected $defaultFormat = self::ISO8601;
@@ -80,7 +85,7 @@ class DateTime extends Base implements ArrayAccess
     public static function __set_state( $array )
     {
         $date = parent::__set_state( $array );
-        return new static( $date->format( DateTime::ISO8601 ) );
+        return new static( $date->format( static::CONVERT ) );
     }
 
     /**
@@ -97,7 +102,7 @@ class DateTime extends Base implements ArrayAccess
             ? parent::createFromFormat( $format, $time, $timezone )
             : parent::createFromFormat( $format, $time );
 
-        return new static( $date->format( DateTime::ISO8601 ) );
+        return new static( $date->format( static::CONVERT ) );
     }
 
     /**
@@ -115,7 +120,7 @@ class DateTime extends Base implements ArrayAccess
         }
         else if ( $dateTime instanceof \DateTime )
         {
-            return new static( $dateTime->format( \DateTime::ISO8601 ) );
+            return new static( $dateTime->format( static::CONVERT ) );
         }
         else if ( is_numeric( $dateTime ) )
         {
