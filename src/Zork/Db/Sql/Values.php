@@ -61,7 +61,7 @@ class Values extends Select
      * @param   array   $columns
      * @return  Values
      */
-    public function columns( array $columns )
+    public function columns( array $columns, $prefixColumnsWithTable = true )
     {
         return parent::columns( $columns, false );
     }
