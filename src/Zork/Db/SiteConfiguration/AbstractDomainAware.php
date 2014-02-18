@@ -38,7 +38,11 @@ abstract class AbstractDomainAware implements SiteConfigurationInterface
                     break;
 
                 case isset( $_SERVER['HTTP_HOST'] ):
-                    $this->domain = $_SERVER['HTTP_HOST'];
+                    $this->domain = preg_replace(
+                        '/^([^:]+):\d+$/',
+                        '$1',
+                        $_SERVER['HTTP_HOST']
+                    );
                     break;
 
                 case isset( $_SERVER['SERVER_NAME'] ):
