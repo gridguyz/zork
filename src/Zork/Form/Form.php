@@ -4,11 +4,12 @@ namespace Zork\Form;
 
 use Zend\Json\Json;
 use Zend\Form\Form as Base;
-
+use Zend\Form\FormInterface;
 /**
  * Zork Form
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
+ * @author Mihaly Farkas <mihaly.farkas@megaweb.hu>
  */
 class Form extends Base
 {
@@ -29,6 +30,16 @@ class Form extends Base
     const JS_CANCEL_ATTR = 'data-js-cancel-buttons';
 
     /**
+     * @const string
+     */
+    const BIND_PLUGIN_CLASSES = 'bind-plugin-classes';
+    
+    /**
+     * @const string
+     */
+    const SET_DATA_PLUGIN_CLASSES = 'set-data-plugin-classes';
+
+    /**
      * Seed attributes
      *
      * @var array
@@ -43,6 +54,62 @@ class Form extends Base
      */
     private $cancelAdded = false;
 
+    public function setData($data) {
+        
+        parent::setData($data);
+        
+        $pluginClasses = $this->getAttribute( static::SET_DATA_PLUGIN_CLASSES );
+        
+        if ( !empty( $pluginClasses ) )
+        {
+            if (!is_array($pluginClasses)) {
+                throw new \InvalidArgumentException('The plugin classes attribute must be an array');
+            }
+        
+            foreach ($pluginClasses as $pluginClass) {
+        
+                if (!is_subclass_of($pluginClass, '\Zork\Form\Plugin\SetDataInterface')) {
+                    throw new \InvalidArgumentException('The plugin class must be implement \Zork\Form\Plugin\SetDataInterface');
+                }
+        
+                $plugin = new $pluginClass();
+                
+                $plugin->setData($this, $data);
+        
+            }
+        }
+        
+        return $this;
+    }
+    
+    public function bind($object, $flags = FormInterface::VALUES_NORMALIZED)
+    {
+        parent::bind($object, $flags);
+        
+        $pluginClasses = $this->getAttribute( static::BIND_PLUGIN_CLASSES );
+        
+        if ( !empty( $pluginClasses ) )
+        {
+            if (!is_array($pluginClasses)) {
+                throw new \InvalidArgumentException('The plugin classes attribute must be an array');
+            }
+            
+            foreach ($pluginClasses as $pluginClass) {
+                
+                if (!is_subclass_of($pluginClass, '\Zork\Form\Plugin\BindInterface')) {
+                    throw new \InvalidArgumentException('The plugin class must be implement \Zork\Form\Plugin\BindInterface');
+                }
+                
+                $plugin = new $pluginClass();
+                
+                $plugin->bind($this);
+                
+            }
+        }
+        
+        return $this;
+    }
+    
     /**
      * Get js-types
      *
