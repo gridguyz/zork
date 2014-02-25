@@ -19,7 +19,7 @@ class Domain extends AbstractHelper
     use SiteInfoAwareTrait;
 
     /**
-     * @param \Zork\Db\SiteInfo $siteInfo
+     * @param   SiteInfo    $siteInfo
      */
     public function __construct( SiteInfo $siteInfo )
     {
@@ -29,47 +29,37 @@ class Domain extends AbstractHelper
     /**
      * Invokable helper
      *
-     * @return \Zork\View\Helper\Locale
+     * @param   null|string $subdomain
+     * @param   bool|string $link
+     * @return  Domain
      */
-    public function __invoke( $subdomain = null )
+    public function __invoke( $subdomain = null, $link = false )
     {
-        if ( null !== $subdomain )
+        if ( null !== $subdomain || false !== $link )
         {
-            return $this->getSubdomain( $subdomain );
+            return $this->getSubdomain( $subdomain, $link );
         }
 
         return $this;
     }
 
     /**
-     * Get subdomain for actual domain
+     * Get subdomain (optionally a whole link) for actual domain
      *
-     * @param   string  $subdomain
+     * @param   null|string $subdomain
+     * @param   bool|string $link
      * @return  string
      */
-    public function getSubdomain( $subdomain = null )
+    public function getSubdomain( $subdomain = null, $link = false )
     {
-        if ( null === $subdomain )
-        {
-            return $this->getSiteInfo()
-                        ->getFulldomain();
-        }
-
-        if ( empty( $subdomain ) )
-        {
-            return $this->getSiteInfo()
-                        ->getDomain();
-        }
-
-        return $subdomain . '.'
-             . $this->getSiteInfo()
-                    ->getDomain();
+        return $this->getSiteInfo()
+                    ->getSubdomainUrl( $subdomain, $link );
     }
 
     /**
-     * Get current locale
+     * Convert to string
      *
-     * @return String
+     * @return  string
      */
     public function __toString()
     {

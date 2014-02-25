@@ -13,7 +13,17 @@ class RedirectionService
     /**
      * @var string
      */
+    protected $scheme;
+
+    /**
+     * @var string
+     */
     protected $domain;
+
+    /**
+     * @var int|null
+     */
+    protected $port;
 
     /**
      * @var string
@@ -28,19 +38,35 @@ class RedirectionService
     /**
      * Constructor
      *
-     * @param string $domain
-     * @param string $reason
-     * @param bool   $usePath
+     * @param   string      $scheme
+     * @param   string      $domain
+     * @param   int|null    $port
+     * @param   string      $reason
+     * @param   bool        $usePath
      */
-    public function __construct( $domain, $reason = '', $usePath = false )
+    public function __construct( $scheme,
+                                 $domain,
+                                 $port,
+                                 $reason    = '',
+                                 $usePath   = false )
     {
-        $this->domain   = (string)  $domain;
-        $this->reason   = (string)  $reason;
-        $this->usePath  = (bool)    $usePath;
+        $this->scheme   = (string) $scheme;
+        $this->domain   = (string) $domain;
+        $this->port     = ( (int)  $port ) ?: null;
+        $this->reason   = (string) $reason;
+        $this->usePath  = (bool)   $usePath;
     }
 
     /**
-     * @return string
+     * @return  string
+     */
+    public function getScheme()
+    {
+        return $this->scheme;
+    }
+
+    /**
+     * @return  string
      */
     public function getDomain()
     {
@@ -48,7 +74,47 @@ class RedirectionService
     }
 
     /**
-     * @return string
+     * @return  int|null
+     */
+    public function getPort()
+    {
+        return $this->port;
+    }
+
+    /**
+     * @param   string|null $path
+     * @return  string
+     */
+    public function getUrl( $path = null )
+    {
+        static $defaultPorts = array(
+            'http'  => 80,
+            'https' => 443,
+        );
+
+        $url    = '';
+        $scheme = $this->getScheme();
+        $path   = '/' . ltrim( $path, '/' );
+
+        if ( $scheme )
+        {
+            $url .= $scheme . ':';
+        }
+
+        $url .= '//' . $this->getDomain();
+        $port = $this->getPort();
+
+        if ( $port && ( empty( $defaultPorts[$scheme] )
+                || $port != $defaultPorts[$scheme] ) )
+        {
+            $url .= ':' . $port;
+        }
+
+        return $url . $path;
+    }
+
+    /**
+     * @return  string
      */
     public function getReason()
     {
@@ -56,7 +122,7 @@ class RedirectionService
     }
 
     /**
-     * @return bool
+     * @return  bool
      */
     public function getUsePath()
     {

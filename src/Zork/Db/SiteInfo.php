@@ -74,6 +74,20 @@ class SiteInfo
     protected $fulldomain;
 
     /**
+     * Used scheme (http/https)
+     *
+     * @var string
+     */
+    protected $scheme = 'http';
+
+    /**
+     * Used port number
+     *
+     * @var int|null
+     */
+    protected $port;
+
+    /**
      * Constructor for SiteInfo
      *
      * @param array|\Traversable $siteInfoParams
@@ -92,7 +106,7 @@ class SiteInfo
     /**
      * Site ID
      *
-     * @var int
+     * @return  int
      */
     public function getSiteId()
     {
@@ -102,7 +116,7 @@ class SiteInfo
     /**
      * Site schema
      *
-     * @var string
+     * @return  string
      */
     public function getSchema()
     {
@@ -112,7 +126,7 @@ class SiteInfo
     /**
      * Owner's user ID
      *
-     * @var int
+     * @return  int
      */
     public function getOwnerId()
     {
@@ -122,7 +136,7 @@ class SiteInfo
     /**
      * Site created date-time
      *
-     * @var string
+     * @return  string
      */
     public function getCreated()
     {
@@ -132,7 +146,7 @@ class SiteInfo
     /**
      * Actual domain
      *
-     * @var string
+     * @return  string
      */
     public function getDomain()
     {
@@ -142,7 +156,7 @@ class SiteInfo
     /**
      * Actual domain's IDN
      *
-     * @return string
+     * @return  string
      */
     public function getIdn()
     {
@@ -153,7 +167,7 @@ class SiteInfo
     /**
      * Actual domain ID
      *
-     * @var int
+     * @return  int
      */
     public function getDomainId()
     {
@@ -163,7 +177,7 @@ class SiteInfo
     /**
      * Actual subdomain
      *
-     * @var string
+     * @return  string
      */
     public function getSubdomain()
     {
@@ -173,7 +187,7 @@ class SiteInfo
     /**
      * Actual subdomain ID
      *
-     * @var int
+     * @return  int
      */
     public function getSubdomainId()
     {
@@ -183,7 +197,7 @@ class SiteInfo
     /**
      * Actual fulldomain ([<subdomain>.]<domain>)
      *
-     * @var string
+     * @return  string
      */
     public function getFulldomain()
     {
@@ -193,12 +207,83 @@ class SiteInfo
     /**
      * Actual fulldomain's IDN
      *
-     * @return string
+     * @return  string
      */
     public function getFullIdn()
     {
         $fulldomain = $this->getFulldomain();
         return $fulldomain ? @ idn_to_utf8( $fulldomain ) : '';
+    }
+
+    /**
+     * Used scheme (http/https)
+     *
+     * @return  string
+     */
+    public function getScheme()
+    {
+        return $this->scheme;
+    }
+
+    /**
+     * Used port number
+     *
+     * @return  int|null
+     */
+    public function getPort()
+    {
+        return ( (int) $this->port ) ?: null;
+    }
+
+    /**
+     * Get subdomain url
+     *
+     * @param   null|string $subdomain
+     * @param   bool|string $link
+     * @return  string
+     */
+    public function getSubdomainUrl( $subdomain = null, $link = true )
+    {
+        static $defaultPorts = array(
+            'http'  => 80,
+            'https' => 443,
+        );
+
+        if ( null === $subdomain )
+        {
+            $domain = $this->getFulldomain();
+        }
+        else if ( empty( $subdomain ) )
+        {
+            $domain = $this->getDomain();
+        }
+        else
+        {
+            $domain = $subdomain . '.' . $this->getDomain();
+        }
+
+        if ( false === $link )
+        {
+            return $domain;
+        }
+
+        $path   = '/' . ( $link === true ? '' : ltrim( $link, '/' ) );
+        $scheme = $this->getScheme();
+        $port   = $this->getPort();
+        $link   = '//' . $domain;
+
+        if ( $scheme )
+        {
+            $link = $scheme . ':' . $link;
+        }
+
+        if ( $port && ( empty( $defaultPorts[$scheme] )
+                || $port != $defaultPorts[$scheme] ) )
+        {
+            $link .= ':' . $port;
+        }
+
+        return $link . $path;
     }
 
 }
