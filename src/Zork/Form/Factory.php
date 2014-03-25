@@ -9,6 +9,7 @@ use Zend\Validator\ValidatorChain;
 use Zend\InputFilter\Factory as InputFilterFactory;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use Zend\Validator\Translator\TranslatorAwareInterface;
 use Zork\ServiceManager\ApplicationServiceLocatorAwareInterface;
 
 /**
@@ -178,9 +179,18 @@ class Factory extends ZendFactory
      */
     public function initializeApplicationServiceLocators( $instance )
     {
+        $serviceLocator = $this->getServiceLocator();
+
         if ( $instance instanceof ApplicationServiceLocatorAwareInterface )
         {
-            $instance->setServiceLocator( $this->getServiceLocator() );
+            $instance->setServiceLocator( $serviceLocator );
+        }
+
+        if ( $instance instanceof TranslatorAwareInterface )
+        {
+            $instance->setTranslator( $serviceLocator->get(
+                'Zend\Validator\Translator\TranslatorInterface'
+            ) );
         }
 
         return $this;

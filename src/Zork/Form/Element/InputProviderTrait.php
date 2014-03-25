@@ -787,7 +787,7 @@ trait InputProviderTrait
     /**
      * Set display-group
      *
-     * @param string|null $required
+     * @param string|null $displayGroup
      * @return \Zork\Form\Element
      */
     public function setDisplayGroup( $displayGroup )
