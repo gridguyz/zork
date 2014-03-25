@@ -16,8 +16,8 @@ class TranslatorServiceFactory implements FactoryInterface
     /**
      * Create service
      *
-     * @param ServiceLocatorInterface $serviceLocator
-     * @return mixed
+     * @param   ServiceLocatorInterface $serviceLocator
+     * @return  I18nTranslatorGateway
      */
     public function createService( ServiceLocatorInterface $serviceLocator )
     {
