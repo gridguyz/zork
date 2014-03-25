@@ -31,7 +31,7 @@ class I18nTranslatorGateway implements TranslatorInterface
      * @param   Translator  $translator
      * @return  I18nTranslatorGateway
      */
-    public function setTranslator( I18nTranslator $translator )
+    public function setTranslator( Translator $translator )
     {
         $this->translator = $translator;
     }
