@@ -81,7 +81,10 @@ class HtmlTag extends AbstractHelper
 
             foreach ( $attribs as $key => $value )
             {
-                $result .= ' ' . $key . '="' . $escape( $value ) . '"';
+                if ( null !== $value )
+                {
+                    $result .= ' ' . $key . '="' . $escape( $value ) . '"';
+                }
             }
         }
 
