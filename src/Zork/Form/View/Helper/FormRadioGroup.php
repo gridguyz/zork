@@ -178,10 +178,10 @@ class FormRadioGroup extends AbstractHelper
      * )
      * </code>
      *
-     * @param  array $options
-     * @param  array $selectedOptions Option values that should be marked as selected
-     * @param  array $additionalAttribures
-     * @param  array $optionAttributeFilters
+     * @param  array    $options
+     * @param  string   $selectedValue          Option value that should be marked as selected
+     * @param  array    $additionalAttribures
+     * @param  array    $optionAttributeFilters
      * @return string
      */
     public function renderRadios( array $options,
@@ -211,12 +211,15 @@ class FormRadioGroup extends AbstractHelper
             if ( isset( $optionSpec['options'] ) &&
                  is_array( $optionSpec['options'] ) )
             {
-                $radioStrings[] = $this->renderFieldset(
-                    $optionSpec,
-                    $selectedValue,
-                    $additionalAttribures,
-                    $optionAttributeFilters
-                );
+                if ( ! empty( $optionSpec['options'] ) )
+                {
+                    $radioStrings[] = $this->renderFieldset(
+                        $optionSpec,
+                        $selectedValue,
+                        $additionalAttribures,
+                        $optionAttributeFilters
+                    );
+                }
 
                 continue;
             }
