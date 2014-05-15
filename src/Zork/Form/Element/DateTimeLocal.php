@@ -2,6 +2,7 @@
 
 namespace Zork\Form\Element;
 
+use DateInterval;
 use Zend\Form\Element\DateTimeLocal as ElementBase;
 use Zend\InputFilter\InputProviderInterface;
 use Zork\Form\TranslatorSettingsAwareInterface;
