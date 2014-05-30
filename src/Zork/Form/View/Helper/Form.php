@@ -422,32 +422,9 @@ class Form extends BaseHelper
         }
         else if ( $element instanceof FieldsetInterface )
         {
-            $attrs = $this->createFieldsetAttributes( $element );
-
-            if ( $label && $this->isTranslatorEnabled() )
-            {
-                $label = $this->getTranslator()
-                              ->translate(
-                                    $label,
-                                    $this->getTranslatorTextDomain() ?: 'default'
-                                );
-            }
-
             $markup .= sprintf( $this->inputOpen, 'fieldset' );
             $markup .= PHP_EOL;
-            $markup .= sprintf( '<fieldset%s>', $attrs );
-            $markup .= PHP_EOL;
-
-            if ( $label )
-            {
-                $markup .= sprintf( '<legend>%s</legend>', $label );
-                $markup .= PHP_EOL;
-            }
-
-            $markup .= $this->renderFieldset( $element, 'fieldset' );
-            $markup .= PHP_EOL;
-            $markup .= '</fieldset>';
-            $markup .= PHP_EOL;
+            $markup .= $this->renderFieldset( $element );
             $markup .= $this->inputClose;
         }
         else
@@ -499,11 +476,45 @@ class Form extends BaseHelper
      * Render a fieldset
      *
      * @param \Zend\Form\FieldsetInterface $fieldset
+     * @return string
+     */
+    public function renderFieldset( FieldsetInterface $fieldset )
+    {
+        $legend = $fieldset->getLabel();
+        $attrs  = $this->createFieldsetAttributes( $fieldset );
+        $markup = sprintf( '<fieldset%s>', $attrs ) . PHP_EOL;
+
+        if ( $legend && $this->isTranslatorEnabled() )
+        {
+            $legend = $this->getTranslator()
+                           ->translate(
+                                 $legend,
+                                 $this->getTranslatorTextDomain() ?: 'default'
+                             );
+        }
+
+        if ( $legend )
+        {
+            $markup .= sprintf( '<legend>%s</legend>', $legend );
+            $markup .= PHP_EOL;
+        }
+
+        $markup .= $this->renderFieldsetContent( $fieldset, 'fieldset' );
+        $markup .= PHP_EOL;
+        $markup .= '</fieldset>';
+        $markup .= PHP_EOL;
+        return $markup;
+    }
+
+    /**
+     * Render a fieldset content
+     *
+     * @param \Zend\Form\FieldsetInterface $fieldset
      * @param string $class
      * @return string
      */
-    public function renderFieldset( FieldsetInterface $fieldset,
-                                    $class = '' )
+    public function renderFieldsetContent( FieldsetInterface $fieldset,
+                                           $class = '' )
     {
         $markup     = '';
         $elements   = array();
@@ -591,10 +602,10 @@ class Form extends BaseHelper
         $markup  = '';
         $markup .= $this->openTag( $form );
         $markup .= PHP_EOL;
-        $markup .= $this->renderFieldset( $form,
-                                          $form->hasValidated()
-                                              ? $this->formValidatedClass
-                                              : '' );
+        $markup .= $this->renderFieldsetContent( $form,
+                                                $form->hasValidated()
+                                                    ? $this->formValidatedClass
+                                                    : '' );
         $markup .= PHP_EOL;
         $markup .= $this->closeTag();
         return $markup;
