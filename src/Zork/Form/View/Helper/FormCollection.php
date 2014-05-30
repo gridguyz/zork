@@ -3,6 +3,7 @@
 namespace Zork\Form\View\Helper;
 
 use Zend\Form\ElementInterface;
+use Zend\Form\FieldsetInterface;
 use Zend\Form\Element\Collection;
 use Zend\Form\View\Helper\FormCollection as BaseHelper;
 
@@ -58,8 +59,11 @@ class FormCollection extends BaseHelper
     {
         if ( ! $element instanceof Collection )
         {
-            $elementHelper = $this->getElementHelper();
-            return $elementHelper( $element );
+            $helper = ( $element instanceof FieldsetInterface )
+                    ? $this->getFieldsetHelper()
+                    : $this->getElementHelper();
+
+            return $helper( $element );
         }
 
         $markup = parent::render( $element );

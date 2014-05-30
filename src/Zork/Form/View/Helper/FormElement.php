@@ -6,11 +6,11 @@ use Zend\Form\ElementInterface;
 use Zend\Form\View\Helper\AbstractHelper;
 
 /**
- * FormFieldsetElement
+ * FormElement
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
  */
-class FormFieldsetElement extends AbstractHelper
+class FormElement extends AbstractHelper
 {
 
     /**
@@ -50,7 +50,7 @@ class FormFieldsetElement extends AbstractHelper
         if ( $element )
         {
             return $this->getFormHelper()
-                        ->renderFieldsetItem( $element );
+                        ->renderElement( $element );
         }
 
         return $this;
