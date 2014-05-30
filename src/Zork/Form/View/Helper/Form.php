@@ -6,7 +6,6 @@ use Zend\Form\FormInterface;
 use Zend\Form\FieldsetInterface;
 use Zend\Form\ElementInterface;
 use Zend\Form\Element\Collection;
-use Zork\Form\Element\HashCollection;
 use Zend\Form\View\Helper\Form as BaseHelper;
 use Zend\Form\View\Helper\FormLabel;
 use Zend\Form\View\Helper\FormElementErrors;
@@ -402,9 +401,26 @@ class Form extends BaseHelper
             $labelHelper->setTranslatorEnabled( false );
         }
 
-        if ( $element instanceof FieldsetInterface &&
-             ! $element instanceof Collection      &&
-             ! $element instanceof HashCollection   )
+        if ( $element instanceof Collection )
+        {
+            if ( ! empty( $label ) )
+            {
+                $markup .= sprintf( $this->labelOpen, 'label label-collection' );
+                $markup .= PHP_EOL;
+                $markup .= $labelHelper( $element );
+                $markup .= PHP_EOL;
+                $markup .= $this->labelClose;
+                $markup .= PHP_EOL;
+            }
+
+            $markup .= sprintf( $this->inputOpen, 'input input-collection' );
+            $markup .= PHP_EOL;
+            $markup .= $this->renderElement( $element );
+            $markup .= $this->renderDescription( $element );
+            $markup .= PHP_EOL;
+            $markup .= $this->inputClose;
+        }
+        else if ( $element instanceof FieldsetInterface )
         {
             $attrs = $this->createFieldsetAttributes( $element );
 
