@@ -6,6 +6,7 @@ use Zend\Form\ElementInterface;
 use Zend\Form\FieldsetInterface;
 use Zend\Form\Element\Collection;
 use Zend\Form\View\Helper\FormCollection as BaseHelper;
+use Zend\View\Helper\AbstractHelper as BaseAbstractHelper;
 
 /**
  * FormCollection
@@ -27,7 +28,36 @@ class FormCollection extends BaseHelper
      *
      * @var string
      */
-    protected $defaultElementHelper = 'formFieldsetElement';
+    protected $defaultElementHelper = 'formElement';
+
+    /**
+     * The name of the default view helper that is used to render sub elements.
+     *
+     * @var string
+     */
+    protected $defaultFieldsetHelper = 'formFieldset';
+
+    /**
+     * Sets the name of the view helper that should be used to render fieldsets.
+     *
+     * @param  string $defaultSubHelper The name of the view helper to set.
+     * @return FormCollection
+     */
+    public function setDefaultFieldsetHelper($defaultSubHelper)
+    {
+        $this->defaultFieldsetHelper = $defaultSubHelper;
+        return $this;
+    }
+
+    /**
+     * Gets the name of the view helper that should be used to render fieldsets.
+     *
+     * @return string
+     */
+    public function getDefaultFieldsetHelper()
+    {
+        return $this->defaultFieldsetHelper;
+    }
 
     /**
      * Invoke helper as function
@@ -93,7 +123,23 @@ class FormCollection extends BaseHelper
             return $this->fieldsetHelper;
         }
 
-        return $this->getElementHelper();
+        if ( method_exists( $this->view, 'plugin' ) )
+        {
+            $this->fieldsetHelper = $this->view->plugin(
+                $this->getDefaultFieldsetHelper()
+            );
+        }
+
+        if ( ! $this->fieldsetHelper instanceof BaseAbstractHelper )
+        {
+            // @todo Ideally the helper should implement an interface.
+            throw new RuntimeException(
+                'Invalid element helper set in FormCollection. ' .
+                'The helper must be an instance of AbstractHelper.'
+            );
+        }
+
+        return $this->fieldsetHelper;
     }
 
 }
