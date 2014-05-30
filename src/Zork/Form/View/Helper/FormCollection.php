@@ -3,6 +3,7 @@
 namespace Zork\Form\View\Helper;
 
 use Zend\Form\ElementInterface;
+use Zend\Form\Element\Collection;
 use Zend\Form\View\Helper\FormCollection as BaseHelper;
 
 /**
@@ -44,7 +45,7 @@ class FormCollection extends BaseHelper
         }
 
         return $this->setShouldWrap( $wrap )
-                    ->render( $element );
+                    ->render( $element, true );
     }
 
     /**
@@ -53,13 +54,27 @@ class FormCollection extends BaseHelper
      * @param  ElementInterface $element
      * @return string
      */
-    public function render( ElementInterface $element )
+    public function render( ElementInterface $element, $wrap = false )
     {
-        return sprintf(
-            '<div %s>%s</div>',
-            $this->createAttributesString( $element->getAttributes() ),
-            parent::render( $element )
-        );
+        if ( ! $element instanceof Collection )
+        {
+            $elementHelper = $this->getElementHelper();
+            return $elementHelper( $element );
+        }
+
+        $markup = parent::render( $element );
+
+        if ( $wrap )
+        {
+            $attrs  = $this->createAttributesString( $element->getAttributes() );
+            $markup = sprintf(
+                '<div%s>%s</div>',
+                $attrs ? ' ' . $attrs : '',
+                $markup
+            );
+        }
+
+        return $markup;
     }
 
     /**
