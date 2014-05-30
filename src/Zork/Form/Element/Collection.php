@@ -19,6 +19,16 @@ class Collection extends ElementBase
     use InputProviderTrait;
 
     /**
+     * Seed attributes
+     *
+     * @var array
+     */
+    protected $attributes = array(
+        'data-js-type'                  => 'js.form.element.collection',
+        'data-js-collection-sortable'   => 'true',
+    );
+
+    /**
      * Initial count of target element
      *
      * @var int
