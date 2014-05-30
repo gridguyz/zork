@@ -50,7 +50,7 @@ class FormFieldset extends AbstractHelper
         if ( $element )
         {
             return $this->getFormHelper()
-                        ->renderFieldset( $element );
+                        ->renderFieldsetItem( $element );
         }
 
         return $this;
