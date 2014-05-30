@@ -6,11 +6,11 @@ use Zend\Form\ElementInterface;
 use Zend\Form\View\Helper\AbstractHelper;
 
 /**
- * FormFieldsetElement
+ * FormFieldset
  *
  * @author David Pozsar <david.pozsar@megaweb.hu>
  */
-class FormFieldsetElement extends AbstractHelper
+class FormFieldset extends AbstractHelper
 {
 
     /**
