@@ -48,6 +48,21 @@ class FormCollection extends BaseHelper
     }
 
     /**
+     * Render a collection by iterating through all fieldsets and elements
+     *
+     * @param  ElementInterface $element
+     * @return string
+     */
+    public function render( ElementInterface $element )
+    {
+        return sprintf(
+            '<div %s>%s</div>',
+            $this->createAttributesString( $element->getAttributes() ),
+            parent::render( $element )
+        );
+    }
+
+    /**
      * Retrieve the fieldset helper.
      *
      * @return FormFieldsetElement
