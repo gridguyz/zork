@@ -2,9 +2,10 @@
 
 namespace Zork\Form\Element;
 
-use Zend\Form\Element\Collection as ElementBase;
+use Zork\Stdlib\Hydrator\Traversable;
 use Zend\InputFilter\InputProviderInterface;
 use Zork\Form\TranslatorSettingsAwareInterface;
+use Zend\Form\Element\Collection as ElementBase;
 
 /**
  * Element
@@ -34,5 +35,15 @@ class Collection extends ElementBase
      * @var int
      */
     protected $count = 0;
+
+    /**
+     * @param  null|int|string  $name    Optional name for the element
+     * @param  array            $options Optional options for the element
+     */
+    public function __construct( $name = null, $options = array() )
+    {
+        parent::__construct( $name, $options );
+        $this->hydrator = new Traversable;
+    }
 
 }
