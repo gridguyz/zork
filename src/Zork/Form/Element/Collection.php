@@ -38,6 +38,16 @@ class Collection extends ElementBase
     protected $count = 0;
 
     /**
+     * @param  null|int|string  $name    Optional name for the element
+     * @param  array            $options Optional options for the element
+     */
+    public function __construct( $name = null, $options = array() )
+    {
+        parent::__construct( $name, $options );
+        $this->setHydrator( new Traversable );
+    }
+
+    /**
      * Set the target element
      *
      * @param   ElementInterface|array|\Traversable $elementOrFieldset
