@@ -22,9 +22,12 @@ class Traversable implements HydratorInterface
     {
         $data = array();
 
-        foreach ( $object as $key => $value )
+        if ( ! empty( $object ) )
         {
-            $data[$key] = $value;
+            foreach ( $object as $key => $value )
+            {
+                $data[$key] = $value;
+            }
         }
 
         return $data;
@@ -39,6 +42,11 @@ class Traversable implements HydratorInterface
      */
     public function hydrate( array $data, $object )
     {
+        if ( null === $object )
+        {
+            $object = array();
+        }
+
         if ( is_array( $object ) )
         {
             foreach ( $data as $key => $value )
