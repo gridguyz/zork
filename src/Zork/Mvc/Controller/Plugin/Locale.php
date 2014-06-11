@@ -3,8 +3,9 @@
 namespace Zork\Mvc\Controller\Plugin;
 
 use Locale as IntlLocale;
-use Zend\Mvc\Controller\Plugin\AbstractPlugin;
 use Zend\Http\Header\AcceptLanguage;
+use Zend\Mvc\Controller\Plugin\AbstractPlugin;
+use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\Http\Header\Accept\FieldValuePart\LanguageFieldValuePart;
 
 /**
@@ -38,12 +39,24 @@ class Locale extends AbstractPlugin
     /**
      * Parse header
      *
-     * @param null|\Zend\Http\Header\AcceptLanguage $header
-     * @return array
+     * @param   null|\Zend\Http\Header\AcceptLanguage   $header
+     * @return  array
      */
     public function parseHeader( $header )
     {
-        $locale = array();
+        $locales    = array();
+        $controller = $this->getController();
+
+        if ( $controller instanceof ServiceLocatorAwareInterface )
+        {
+            $availables = $controller->getServiceLocator()
+                                     ->get( 'Locale' )
+                                     ->getAvailableLocales();
+        }
+        else
+        {
+            $availables = array( IntlLocale::getDefault() );
+        }
 
         if ( $header instanceof AcceptLanguage )
         {
@@ -59,7 +72,18 @@ class Locale extends AbstractPlugin
                         $key .= '_' . $locale['region'];
                     }
 
-                    $locales[$key] = $part->getPriority();
+                    if ( $availables )
+                    {
+                        $key = IntlLocale::lookup( $availables, $key, false, '' );
+                    }
+
+                    if ( $key )
+                    {
+                        $locales[$key] = max(
+                            $part->getPriority(),
+                            empty( $locales[$key] ) ? 0 : $locales[$key]
+                        );
+                    }
                 }
             }
         }
